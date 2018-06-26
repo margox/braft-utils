@@ -1,5 +1,5 @@
-import baseUtils from './base'
-import colorUtils from './color'
-import contentUtils from './content'
+import BaseUtils from './base'
+import ColorUtils from './color'
+import ContentUtils from './content'
 
-export default { baseUtils, colorUtils, contentUtils }
+export default { BaseUtils, ColorUtils, ContentUtils }
