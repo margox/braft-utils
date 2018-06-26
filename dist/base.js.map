@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/base.js"],"names":["braftUniqueIndex","UniqueIndex"],"mappings":";;;;;AAAA,IAAIA,mBAAmB,CAAvB;;AAEO,IAAMC,oCAAc,SAAdA,WAAc;AAAA,SAAMD,oBAAoB,CAA1B;AAAA,CAApB","file":"base.js","sourcesContent":["let braftUniqueIndex = 0\n\nexport const UniqueIndex = () => braftUniqueIndex += 1"]}

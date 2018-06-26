@@ -1,0 +1,26 @@
+{
+  "name": "braft-utils",
+  "version": "0.0.1",
+  "description": "Utils for Braft Editor",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rm -rf dist/ && BABEL_ENV=production ./node_modules/.bin/babel src --copy-files --source-maps --extensions .es6,.es,.js,.jsx --out-dir dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "braft",
+    "editor",
+    "utils"
+  ],
+  "author": "Margox",
+  "license": "MIT",
+  "peerDependencies": {
+    "draft-js": "^0.10.5",
+    "draftjs-utils": "^0.9.4"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-es2015": "^6.24.1"
+  }
+}
