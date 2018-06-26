@@ -18,5 +18,5 @@ var _content2 = _interopRequireDefault(_content);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = { baseUtils: _base2.default, colorUtils: _color2.default, contentUtils: _content2.default };
+exports.default = { BaseUtils: _base2.default, ColorUtils: _color2.default, ContentUtils: _content2.default };
 //# sourceMappingURL=index.js.map
