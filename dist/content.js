@@ -4,17 +4,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
 var _draftJs = require('draft-js');
 
 var _draftjsUtils = require('draftjs-utils');
 
 var _colors = require('./colors');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
   selectionCollapsed: function selectionCollapsed(selectionState) {
