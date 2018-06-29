@@ -1,11 +1,12 @@
-import { Modifier, EditorState, SelectionState, RichUtils, AtomicBlockUtils } from 'draft-js'
+import { Modifier, EditorState, SelectionState, RichUtils, AtomicBlockUtils, convertFromRaw } from 'draft-js'
 import { setBlockData, getSelectionEntity, removeAllInlineStyles } from 'draftjs-utils'
-import { detectColorsFromHTMLString, detectColorsFromDraftState } from './colors'
+import { detectColorsFromHTMLString, detectColorsFromDraftState } from './color'
+import { convertHTMLToRaw } from 'braft-convert'
 
 export default {
 
-  selectionCollapsed (selectionState) {
-    return selectionState.isCollapsed()
+  selectionCollapsed (editorState) {
+    return editorState.getSelection().isCollapsed()
   },
 
   selectBlock (editorState, block) {
@@ -136,37 +137,37 @@ export default {
   },
 
   toggleSelectionAlignment (editorState, alignment) {
-    return this.setSelectionBlockData({
+    return this.setSelectionBlockData(editorState, {
       textAlign: this.getSelectionBlockData(editorState, 'textAlign') !== alignment ? alignment : undefined
     })
   },
 
-  toggleSelectionColor (editorState, color) {
-    return this.toggleSelectionInlineStyle(editorState, 'COLOR-' + color.replace('#', ''), this.colorList.map(item => 'COLOR-' + item.replace('#', '').toUpperCase()))
+  toggleSelectionColor (editorState, color, colorList = []) {
+    return this.toggleSelectionInlineStyle(editorState, 'COLOR-' + color.replace('#', ''), colorList.map(item => 'COLOR-' + item.replace('#', '').toUpperCase()))
   },
 
-  toggleSelectionBackgroundColor (editorState, color) {
-    return this.toggleSelectionInlineStyle(editorState, 'BGCOLOR-' + color.replace('#', ''), this.colorList.map(item => 'BGCOLOR-' + item.replace('#', '').toUpperCase()))
+  toggleSelectionBackgroundColor (editorState, color, colorList = []) {
+    return this.toggleSelectionInlineStyle(editorState, 'BGCOLOR-' + color.replace('#', ''), colorList.map(item => 'BGCOLOR-' + item.replace('#', '').toUpperCase()))
   },
 
-  toggleSelectionFontSize (editorState, fontSize) {
-    return this.toggleSelectionInlineStyle(editorState, 'FONTSIZE-' + fontSize, this.fontSizeList.map(item => 'FONTSIZE-' + item))
+  toggleSelectionFontSize (editorState, fontSize, fontSizeList = []) {
+    return this.toggleSelectionInlineStyle(editorState, 'FONTSIZE-' + fontSize, fontSizeList.map(item => 'FONTSIZE-' + item))
   },
 
-  toggleSelectionLineHeight (editorState, lineHeight) {
-    return this.toggleSelectionInlineStyle(editorState, 'LINEHEIGHT-' + lineHeight, this.lineHeightList.map(item => 'LINEHEIGHT-' + item))
+  toggleSelectionLineHeight (editorState, lineHeight, lineHeightList = []) {
+    return this.toggleSelectionInlineStyle(editorState, 'LINEHEIGHT-' + lineHeight, lineHeightList.map(item => 'LINEHEIGHT-' + item))
   },
 
-  toggleSelectionFontFamily (editorState, fontFamily) {
-    return this.toggleSelectionInlineStyle(editorState, 'FONTFAMILY-' + fontFamily, this.fontFamilyList.map(item => 'FONTFAMILY-' + item.name.toUpperCase()))
+  toggleSelectionFontFamily (editorState, fontFamily, fontFamilyList = []) {
+    return this.toggleSelectionInlineStyle(editorState, 'FONTFAMILY-' + fontFamily, fontFamilyList.map(item => 'FONTFAMILY-' + item.name.toUpperCase()))
   },
 
-  toggleSelectionLetterSpacing (editorState, letterSpacing) {
-    return this.toggleSelectionInlineStyle(editorState, 'LETTERSPACING-' + letterSpacing, this.letterSpacingList.map(item => 'LETTERSPACING-' + item))
+  toggleSelectionLetterSpacing (editorState, letterSpacing, letterSpacingList = []) {
+    return this.toggleSelectionInlineStyle(editorState, 'LETTERSPACING-' + letterSpacing, letterSpacingList.map(item => 'LETTERSPACING-' + item))
   },
 
-  toggleSelectionIndent (editorState, indent) {
-    return this.toggleSelectionInlineStyle(editorState, 'INDENT-' + indent, this.indentList.map(item => 'INDENT-' + item))
+  toggleSelectionIndent (editorState, indent, indentList= []) {
+    return this.toggleSelectionInlineStyle(editorState, 'INDENT-' + indent, indentList.map(item => 'INDENT-' + item))
   },
 
   insertHorizontalLine (editorState) {
@@ -228,6 +229,7 @@ export default {
 
     } catch (error) {
       console.warn(error)
+      return editorState
     }
 
   },
@@ -245,7 +247,7 @@ export default {
     if (!selectionState.isCollapsed()) {
       return replace ? EditorState.push(editorState, Modifier.replaceText(
         contentState, selectionState, text
-      ), 'replace-text') : this
+      ), 'replace-text') : editorState
     } else {
       return EditorState.push(editorState, Modifier.insertText(
         contentState, selectionState, text
@@ -265,18 +267,14 @@ export default {
 
     try {
 
-      const rawContent = this.convertHTML(htmlString)
-      const { blockMap } = rawContent
-      const tempColors = detectColorsFromHTMLString(htmlString)
-
-      // this.addTempColors(tempColors)
-      // this.requestFocus()
+      const { blockMap } = convertFromRaw(convertHTMLToRaw(htmlString))
 
       return EditorState.push(editorState, Modifier.replaceWithFragment(
         contentState, selectionState, blockMap
       ), 'insert-fragment')
 
     } catch (error) {
+      console.warn(error)
       return editorState
     }
 

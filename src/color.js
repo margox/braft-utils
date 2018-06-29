@@ -142,33 +142,33 @@ const namedColors = {
   "yellowgreen": "#9acd32"
 }
 
+const getHexColor = (color) => {
+
+  color = color.replace('color:', '').replace(';', '').replace(' ', '')
+
+  if (/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(color)) {
+    return color
+  } else if (namedColors[color]) {
+    return namedColors[color]
+  } else if (color.indexOf('rgb') === 0) {
+
+    let rgbArray = color.split(',')
+    let convertedColor = rgbArray.length < 3 ? null : '#' + [rgbArray[0], rgbArray[1], rgbArray[2]].map(x => {
+      const hex = parseInt(x.replace(/\D/g, ''), 10).toString(16)
+      return hex.length === 1 ? '0' + hex : hex
+    }).join('')
+
+    return /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(convertedColor) ? convertedColor : null
+
+  } else {
+    return null
+  }
+
+}
+
 export default {
 
-  namedColors,
-
-  getHexColor (color) {
-
-    color = color.replace('color:', '').replace(';', '').replace(' ', '')
-
-    if (/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(color)) {
-      return color
-    } else if (namedColors[color]) {
-      return namedColors[color]
-    } else if (color.indexOf('rgb') === 0) {
-
-      let rgbArray = color.split(',')
-      let convertedColor = rgbArray.length < 3 ? null : '#' + [rgbArray[0], rgbArray[1], rgbArray[2]].map(x => {
-        const hex = parseInt(x.replace(/\D/g, ''), 10).toString(16)
-        return hex.length === 1 ? '0' + hex : hex
-      }).join('')
-
-      return /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(convertedColor) ? convertedColor : null
-
-    } else {
-      return null
-    }
-
-  },
+  namedColors, getHexColor,
 
   detectColorsFromHTMLString (html) {
     return typeof html !== 'string' ? [] : (html.match(/color:[^;]{3,24};/g) || []).map(getHexColor).filter(color => color)

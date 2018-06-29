@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.ContentUtils = exports.ColorUtils = exports.BaseUtils = undefined;
 
 var _base = require('./base');
 
@@ -18,5 +19,9 @@ var _content2 = _interopRequireDefault(_content);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = { BaseUtils: _base2.default, ColorUtils: _color2.default, ContentUtils: _content2.default };
+var BaseUtils = exports.BaseUtils = _base2.default;
+var ColorUtils = exports.ColorUtils = _color2.default;
+var ContentUtils = exports.ContentUtils = _content2.default;
+
+exports.default = { BaseUtils: BaseUtils, ColorUtils: ColorUtils, ContentUtils: ContentUtils };
 //# sourceMappingURL=index.js.map

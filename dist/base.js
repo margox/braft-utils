@@ -5,7 +5,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 var braftUniqueIndex = 0;
 
-var UniqueIndex = exports.UniqueIndex = function UniqueIndex() {
-  return braftUniqueIndex += 1;
+exports.default = {
+  UniqueIndex: function UniqueIndex() {
+    return braftUniqueIndex += 1;
+  }
 };
 //# sourceMappingURL=base.js.map

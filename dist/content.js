@@ -8,11 +8,13 @@ var _draftJs = require('draft-js');
 
 var _draftjsUtils = require('draftjs-utils');
 
-var _colors = require('./colors');
+var _color = require('./color');
+
+var _braftConvert = require('braft-convert');
 
 exports.default = {
-  selectionCollapsed: function selectionCollapsed(selectionState) {
-    return selectionState.isCollapsed();
+  selectionCollapsed: function selectionCollapsed(editorState) {
+    return editorState.getSelection().isCollapsed();
   },
   selectBlock: function selectBlock(editorState, block) {
 
@@ -133,42 +135,56 @@ exports.default = {
     return (0, _draftjsUtils.removeAllInlineStyles)(editorState);
   },
   toggleSelectionAlignment: function toggleSelectionAlignment(editorState, alignment) {
-    return this.setSelectionBlockData({
+    return this.setSelectionBlockData(editorState, {
       textAlign: this.getSelectionBlockData(editorState, 'textAlign') !== alignment ? alignment : undefined
     });
   },
   toggleSelectionColor: function toggleSelectionColor(editorState, color) {
-    return this.toggleSelectionInlineStyle(editorState, 'COLOR-' + color.replace('#', ''), this.colorList.map(function (item) {
+    var colorList = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+    return this.toggleSelectionInlineStyle(editorState, 'COLOR-' + color.replace('#', ''), colorList.map(function (item) {
       return 'COLOR-' + item.replace('#', '').toUpperCase();
     }));
   },
   toggleSelectionBackgroundColor: function toggleSelectionBackgroundColor(editorState, color) {
-    return this.toggleSelectionInlineStyle(editorState, 'BGCOLOR-' + color.replace('#', ''), this.colorList.map(function (item) {
+    var colorList = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+    return this.toggleSelectionInlineStyle(editorState, 'BGCOLOR-' + color.replace('#', ''), colorList.map(function (item) {
       return 'BGCOLOR-' + item.replace('#', '').toUpperCase();
     }));
   },
   toggleSelectionFontSize: function toggleSelectionFontSize(editorState, fontSize) {
-    return this.toggleSelectionInlineStyle(editorState, 'FONTSIZE-' + fontSize, this.fontSizeList.map(function (item) {
+    var fontSizeList = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+    return this.toggleSelectionInlineStyle(editorState, 'FONTSIZE-' + fontSize, fontSizeList.map(function (item) {
       return 'FONTSIZE-' + item;
     }));
   },
   toggleSelectionLineHeight: function toggleSelectionLineHeight(editorState, lineHeight) {
-    return this.toggleSelectionInlineStyle(editorState, 'LINEHEIGHT-' + lineHeight, this.lineHeightList.map(function (item) {
+    var lineHeightList = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+    return this.toggleSelectionInlineStyle(editorState, 'LINEHEIGHT-' + lineHeight, lineHeightList.map(function (item) {
       return 'LINEHEIGHT-' + item;
     }));
   },
   toggleSelectionFontFamily: function toggleSelectionFontFamily(editorState, fontFamily) {
-    return this.toggleSelectionInlineStyle(editorState, 'FONTFAMILY-' + fontFamily, this.fontFamilyList.map(function (item) {
+    var fontFamilyList = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+    return this.toggleSelectionInlineStyle(editorState, 'FONTFAMILY-' + fontFamily, fontFamilyList.map(function (item) {
       return 'FONTFAMILY-' + item.name.toUpperCase();
     }));
   },
   toggleSelectionLetterSpacing: function toggleSelectionLetterSpacing(editorState, letterSpacing) {
-    return this.toggleSelectionInlineStyle(editorState, 'LETTERSPACING-' + letterSpacing, this.letterSpacingList.map(function (item) {
+    var letterSpacingList = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+    return this.toggleSelectionInlineStyle(editorState, 'LETTERSPACING-' + letterSpacing, letterSpacingList.map(function (item) {
       return 'LETTERSPACING-' + item;
     }));
   },
   toggleSelectionIndent: function toggleSelectionIndent(editorState, indent) {
-    return this.toggleSelectionInlineStyle(editorState, 'INDENT-' + indent, this.indentList.map(function (item) {
+    var indentList = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+    return this.toggleSelectionInlineStyle(editorState, 'INDENT-' + indent, indentList.map(function (item) {
       return 'INDENT-' + item;
     }));
   },
@@ -226,6 +242,7 @@ exports.default = {
       return nextEditorState;
     } catch (error) {
       console.warn(error);
+      return editorState;
     }
   },
   insertText: function insertText(editorState, text) {
@@ -241,7 +258,7 @@ exports.default = {
     }
 
     if (!selectionState.isCollapsed()) {
-      return replace ? _draftJs.EditorState.push(editorState, _draftJs.Modifier.replaceText(contentState, selectionState, text), 'replace-text') : this;
+      return replace ? _draftJs.EditorState.push(editorState, _draftJs.Modifier.replaceText(contentState, selectionState, text), 'replace-text') : editorState;
     } else {
       return _draftJs.EditorState.push(editorState, _draftJs.Modifier.insertText(contentState, selectionState, text), 'insert-text');
     }
@@ -256,17 +273,12 @@ exports.default = {
     var contentState = editorState.getCurrentContent();
 
     try {
-
-      var rawContent = this.convertHTML(htmlString);
-      var blockMap = rawContent.blockMap;
-
-      var tempColors = (0, _colors.detectColorsFromHTMLString)(htmlString);
-
-      // this.addTempColors(tempColors)
-      // this.requestFocus()
+      var _convertFromRaw = (0, _draftJs.convertFromRaw)((0, _braftConvert.convertHTMLToRaw)(htmlString)),
+          blockMap = _convertFromRaw.blockMap;
 
       return _draftJs.EditorState.push(editorState, _draftJs.Modifier.replaceWithFragment(contentState, selectionState, blockMap), 'insert-fragment');
     } catch (error) {
+      console.warn(error);
       return editorState;
     }
   },

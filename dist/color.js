@@ -147,32 +147,33 @@ var namedColors = {
   "yellowgreen": "#9acd32"
 };
 
+var getHexColor = function getHexColor(color) {
+
+  color = color.replace('color:', '').replace(';', '').replace(' ', '');
+
+  if (/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(color)) {
+    return color;
+  } else if (namedColors[color]) {
+    return namedColors[color];
+  } else if (color.indexOf('rgb') === 0) {
+
+    var rgbArray = color.split(',');
+    var convertedColor = rgbArray.length < 3 ? null : '#' + [rgbArray[0], rgbArray[1], rgbArray[2]].map(function (x) {
+      var hex = parseInt(x.replace(/\D/g, ''), 10).toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    }).join('');
+
+    return (/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(convertedColor) ? convertedColor : null
+    );
+  } else {
+    return null;
+  }
+};
+
 exports.default = {
 
-  namedColors: namedColors,
+  namedColors: namedColors, getHexColor: getHexColor,
 
-  getHexColor: function getHexColor(color) {
-
-    color = color.replace('color:', '').replace(';', '').replace(' ', '');
-
-    if (/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(color)) {
-      return color;
-    } else if (namedColors[color]) {
-      return namedColors[color];
-    } else if (color.indexOf('rgb') === 0) {
-
-      var rgbArray = color.split(',');
-      var convertedColor = rgbArray.length < 3 ? null : '#' + [rgbArray[0], rgbArray[1], rgbArray[2]].map(function (x) {
-        var hex = parseInt(x.replace(/\D/g, ''), 10).toString(16);
-        return hex.length === 1 ? '0' + hex : hex;
-      }).join('');
-
-      return (/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(convertedColor) ? convertedColor : null
-      );
-    } else {
-      return null;
-    }
-  },
   detectColorsFromHTMLString: function detectColorsFromHTMLString(html) {
     return typeof html !== 'string' ? [] : (html.match(/color:[^;]{3,24};/g) || []).map(getHexColor).filter(function (color) {
       return color;
