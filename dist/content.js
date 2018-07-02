@@ -345,6 +345,9 @@ exports.default = {
 
     return _draftJs.EditorState.push(editorState, _draftJs.Modifier.removeRange(contentState, allSelected, 'backward'), 'remove-range');
   },
+  handleKeyCommand: function handleKeyCommand(editorState, command) {
+    return _draftJs.RichUtils.handleKeyCommand(editorState, command);
+  },
   undo: function undo(editorState) {
     return _draftJs.EditorState.undo(editorState);
   },

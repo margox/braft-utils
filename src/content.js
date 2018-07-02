@@ -347,6 +347,10 @@ export default {
 
   },
 
+  handleKeyCommand (editorState, command) {
+    return RichUtils.handleKeyCommand(editorState, command)
+  },
+
   undo (editorState) {
     return EditorState.undo(editorState)
   },
