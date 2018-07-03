@@ -357,6 +357,9 @@ exports.default = {
   handleKeyCommand: function handleKeyCommand(editorState, command) {
     return _draftJs.RichUtils.handleKeyCommand(editorState, command);
   },
+  handleNewLine: function handleNewLine(editorState, event) {
+    return (0, _draftjsUtils.handleNewLine)(editorState, event);
+  },
   undo: function undo(editorState) {
     return _draftJs.EditorState.undo(editorState);
   },

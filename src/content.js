@@ -1,5 +1,5 @@
 import { Modifier, EditorState, SelectionState, RichUtils, AtomicBlockUtils, convertFromRaw } from 'draft-js'
-import { setBlockData, getSelectionEntity, removeAllInlineStyles } from 'draftjs-utils'
+import { setBlockData, getSelectionEntity, removeAllInlineStyles, handleNewLine } from 'draftjs-utils'
 import { detectColorsFromHTMLString, detectColorsFromDraftState } from './color'
 import { convertHTMLToRaw } from 'braft-convert'
 
@@ -361,6 +361,10 @@ export default {
 
   handleKeyCommand (editorState, command) {
     return RichUtils.handleKeyCommand(editorState, command)
+  },
+
+  handleNewLine (editorState, event) {
+    return handleNewLine(editorState, event)
   },
 
   undo (editorState) {
