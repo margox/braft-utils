@@ -5,7 +5,19 @@ import { convertHTMLToRaw } from 'braft-convert'
 
 export default {
 
-  selectionCollapsed (editorState) {
+  isEditorState (editorState) {
+    return editorState && editorState.getSelection && getSelection.getCurrentContent
+  },
+
+  createEmptyEditorState (editorDecorators) {
+    return EditorState.createEmpty(editorDecorators)
+  },
+
+  createEditorState (contentState, editorDecorators) {
+    return EditorState.createWithContent(contentState, editorDecorators)
+  },
+
+  isSelectionCollapsed (editorState) {
     return editorState.getSelection().isCollapsed()
   },
 

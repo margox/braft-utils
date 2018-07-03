@@ -13,7 +13,16 @@ var _color = require('./color');
 var _braftConvert = require('braft-convert');
 
 exports.default = {
-  selectionCollapsed: function selectionCollapsed(editorState) {
+  isEditorState: function isEditorState(editorState) {
+    return editorState && editorState.getSelection && getSelection.getCurrentContent;
+  },
+  createEmptyEditorState: function createEmptyEditorState(editorDecorators) {
+    return _draftJs.EditorState.createEmpty(editorDecorators);
+  },
+  createEditorState: function createEditorState(contentState, editorDecorators) {
+    return _draftJs.EditorState.createWithContent(contentState, editorDecorators);
+  },
+  isSelectionCollapsed: function isSelectionCollapsed(editorState) {
     return editorState.getSelection().isCollapsed();
   },
   selectBlock: function selectBlock(editorState, block) {
