@@ -197,21 +197,6 @@ exports.default = {
       return 'INDENT-' + item;
     }));
   },
-  insertHorizontalLine: function insertHorizontalLine(editorState) {
-
-    var selectionState = editorState.getSelection();
-    var contentState = editorState.getCurrentContent();
-
-    if (!selectionState.isCollapsed() || this.getSelectionBlockType(editorState) === 'atomic') {
-      return editorState;
-    }
-
-    var contentStateWithEntity = contentState.createEntity('HR', 'IMMUTABLE', {});
-    var entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    var newEditorState = _draftJs.AtomicBlockUtils.insertAtomicBlock(editorState, entityKey, ' ');
-
-    return newEditorState;
-  },
   toggleSelectionLink: function toggleSelectionLink(editorState, href, target) {
 
     var selectionState = editorState.getSelection();
@@ -290,6 +275,27 @@ exports.default = {
       console.warn(error);
       return editorState;
     }
+  },
+  insertAtomicBlock: function insertAtomicBlock(editorState, type) {
+    var immutable = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+    var data = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+
+
+    var selectionState = editorState.getSelection();
+    var contentState = editorState.getCurrentContent();
+
+    if (!selectionState.isCollapsed() || this.getSelectionBlockType(editorState) === 'atomic') {
+      return editorState;
+    }
+
+    var contentStateWithEntity = contentState.createEntity(type, immutable ? 'IMMUTABLE' : 'MUTABLE', data);
+    var entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+    var newEditorState = _draftJs.AtomicBlockUtils.insertAtomicBlock(editorState, entityKey, ' ');
+
+    return newEditorState;
+  },
+  insertHorizontalLine: function insertHorizontalLine(editorState) {
+    return this.insertAtomicBlock(editorState, 'HR');
   },
   insertMedias: function insertMedias(editorState) {
     var medias = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];

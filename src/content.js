@@ -6,7 +6,7 @@ import { convertHTMLToRaw } from 'braft-convert'
 export default {
 
   isEditorState (editorState) {
-    return editorState && editorState.getSelection && getSelection.getCurrentContent
+    return editorState instanceof EditorState
   },
 
   createEmptyEditorState (editorDecorators) {
@@ -182,23 +182,6 @@ export default {
     return this.toggleSelectionInlineStyle(editorState, 'INDENT-' + indent, indentList.map(item => 'INDENT-' + item))
   },
 
-  insertHorizontalLine (editorState) {
-
-    const selectionState = editorState.getSelection()
-    const contentState = editorState.getCurrentContent()
-
-    if (!selectionState.isCollapsed() || this.getSelectionBlockType(editorState) === 'atomic') {
-      return editorState
-    }
-
-    const contentStateWithEntity = contentState.createEntity('HR', 'IMMUTABLE', {})
-    const entityKey = contentStateWithEntity.getLastCreatedEntityKey()
-    const newEditorState = AtomicBlockUtils.insertAtomicBlock(editorState, entityKey, ' ')
-
-    return newEditorState
-
-  },
-
   toggleSelectionLink (editorState, href, target) {
 
     const selectionState = editorState.getSelection()
@@ -290,6 +273,27 @@ export default {
       return editorState
     }
 
+  },
+
+  insertAtomicBlock (editorState, type, immutable = true, data = {}) {
+
+    const selectionState = editorState.getSelection()
+    const contentState = editorState.getCurrentContent()
+
+    if (!selectionState.isCollapsed() || this.getSelectionBlockType(editorState) === 'atomic') {
+      return editorState
+    }
+
+    const contentStateWithEntity = contentState.createEntity(type, immutable ? 'IMMUTABLE' : 'MUTABLE', data)
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey()
+    const newEditorState = AtomicBlockUtils.insertAtomicBlock(editorState, entityKey, ' ')
+
+    return newEditorState
+
+  },
+
+  insertHorizontalLine (editorState) {
+    return this.insertAtomicBlock(editorState, 'HR')
   },
 
   insertMedias (editorState, medias = []) {
