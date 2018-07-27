@@ -14,7 +14,7 @@ var _braftConvert = require('braft-convert');
 
 exports.default = {
   isEditorState: function isEditorState(editorState) {
-    return editorState && editorState.getSelection && getSelection.getCurrentContent;
+    return editorState instanceof _draftJs.EditorState;
   },
   createEmptyEditorState: function createEmptyEditorState(editorDecorators) {
     return _draftJs.EditorState.createEmpty(editorDecorators);
