@@ -1,6 +1,6 @@
 {
   "name": "braft-utils",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Utils for Braft Editor",
   "main": "dist/index.js",
   "scripts": {

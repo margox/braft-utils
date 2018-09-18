@@ -123,16 +123,11 @@ exports.default = {
     var selectionState = editorState.getSelection();
     var contentState = editorState.getCurrentContent();
 
-    if (selectionState.isCollapsed()) {
-      return editorState;
-    }
-
     style = style.toUpperCase();
     stylesToBeRemoved = stylesToBeRemoved.filter(function (item) {
       return item !== style;
     });
 
-    var currentInlineStyle = this.getSelectionInlineStyle(editorState);
     var nextContentState = stylesToBeRemoved.length ? stylesToBeRemoved.reduce(function (contentState, item) {
       return _draftJs.Modifier.removeInlineStyle(contentState, selectionState, item);
     }, contentState) : contentState;

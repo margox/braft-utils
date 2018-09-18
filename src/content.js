@@ -127,14 +127,9 @@ export default {
     const selectionState = editorState.getSelection()
     const contentState = editorState.getCurrentContent()
 
-    if (selectionState.isCollapsed()) {
-      return editorState
-    }
-
     style = style.toUpperCase()
     stylesToBeRemoved = stylesToBeRemoved.filter(item => item !== style)
 
-    const currentInlineStyle = this.getSelectionInlineStyle(editorState)
     const nextContentState = stylesToBeRemoved.length ? stylesToBeRemoved.reduce((contentState, item) => {
       return Modifier.removeInlineStyle(contentState, selectionState, item) 
     }, contentState) : contentState
