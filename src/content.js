@@ -149,6 +149,12 @@ export default {
     })
   },
 
+  toggleSelectionIndent (editorState, indent) {
+    return this.setSelectionBlockData(editorState, {
+      textIndent: indent <= 0 || indent >= 6 || isNaN(indent) ? undefined : indent
+    })
+  },
+
   toggleSelectionColor (editorState, color, colorList = []) {
     return this.toggleSelectionInlineStyle(editorState, 'COLOR-' + color.replace('#', ''), colorList.map(item => 'COLOR-' + item.replace('#', '').toUpperCase()))
   },
@@ -171,10 +177,6 @@ export default {
 
   toggleSelectionLetterSpacing (editorState, letterSpacing, letterSpacingList = []) {
     return this.toggleSelectionInlineStyle(editorState, 'LETTERSPACING-' + letterSpacing, letterSpacingList.map(item => 'LETTERSPACING-' + item))
-  },
-
-  toggleSelectionIndent (editorState, indent, indentList= []) {
-    return this.toggleSelectionInlineStyle(editorState, 'INDENT-' + indent, indentList.map(item => 'INDENT-' + item))
   },
 
   toggleSelectionLink (editorState, href, target) {

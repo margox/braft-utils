@@ -143,6 +143,11 @@ exports.default = {
       textAlign: this.getSelectionBlockData(editorState, 'textAlign') !== alignment ? alignment : undefined
     });
   },
+  toggleSelectionIndent: function toggleSelectionIndent(editorState, indent) {
+    return this.setSelectionBlockData(editorState, {
+      textIndent: indent <= 0 || indent >= 6 || isNaN(indent) ? undefined : indent
+    });
+  },
   toggleSelectionColor: function toggleSelectionColor(editorState, color) {
     var colorList = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
@@ -183,13 +188,6 @@ exports.default = {
 
     return this.toggleSelectionInlineStyle(editorState, 'LETTERSPACING-' + letterSpacing, letterSpacingList.map(function (item) {
       return 'LETTERSPACING-' + item;
-    }));
-  },
-  toggleSelectionIndent: function toggleSelectionIndent(editorState, indent) {
-    var indentList = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-
-    return this.toggleSelectionInlineStyle(editorState, 'INDENT-' + indent, indentList.map(function (item) {
-      return 'INDENT-' + item;
     }));
   },
   toggleSelectionLink: function toggleSelectionLink(editorState, href, target) {
