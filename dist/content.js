@@ -62,8 +62,14 @@ exports.default = {
   getSelectionBlock: function getSelectionBlock(editorState) {
     return editorState.getCurrentContent().getBlockForKey(editorState.getSelection().getAnchorKey());
   },
-  setSelectionBlockData: function setSelectionBlockData(editorState, blockData) {
-    return (0, _draftjsUtils.setBlockData)(editorState, blockData);
+  setSelectionBlockData: function setSelectionBlockData(editorState, blockData, override) {
+
+    if (override) {
+      return (0, _draftjsUtils.setBlockData)(editorState, blockData);
+    } else {
+      var allBlockData = this.getSelectionBlockData(editorState).toJS();
+      return (0, _draftjsUtils.setBlockData)(editorState, Object.assign({}, allBlockData, blockData));
+    }
   },
   getSelectionBlockData: function getSelectionBlockData(editorState, name) {
     var blockData = this.getSelectionBlock(editorState).getData();
@@ -144,8 +150,10 @@ exports.default = {
     });
   },
   toggleSelectionIndent: function toggleSelectionIndent(editorState, indent) {
+    var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 6;
+
     return this.setSelectionBlockData(editorState, {
-      textIndent: indent <= 0 || indent >= 6 || isNaN(indent) ? undefined : indent
+      textIndent: indent <= 0 || indent > max || isNaN(indent) ? undefined : indent
     });
   },
   toggleSelectionColor: function toggleSelectionColor(editorState, color) {

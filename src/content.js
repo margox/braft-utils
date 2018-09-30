@@ -61,8 +61,15 @@ export default {
     return editorState.getCurrentContent().getBlockForKey(editorState.getSelection().getAnchorKey())
   },
 
-  setSelectionBlockData (editorState, blockData) {
-    return setBlockData(editorState, blockData)
+  setSelectionBlockData (editorState, blockData, override) {
+
+    if (override) {
+      return setBlockData(editorState, blockData)
+    } else {
+      const allBlockData = this.getSelectionBlockData(editorState).toJS()
+      return setBlockData(editorState, Object.assign({}, allBlockData, blockData))
+    }
+
   },
 
   getSelectionBlockData (editorState, name) {
@@ -149,9 +156,9 @@ export default {
     })
   },
 
-  toggleSelectionIndent (editorState, indent) {
+  toggleSelectionIndent (editorState, indent, max = 6) {
     return this.setSelectionBlockData(editorState, {
-      textIndent: indent <= 0 || indent >= 6 || isNaN(indent) ? undefined : indent
+      textIndent: indent <= 0 || indent > max || isNaN(indent) ? undefined : indent
     })
   },
 
