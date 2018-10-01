@@ -156,10 +156,18 @@ export default {
     })
   },
 
-  toggleSelectionIndent (editorState, indent, max = 6) {
-    return this.setSelectionBlockData(editorState, {
-      textIndent: indent <= 0 || indent > max || isNaN(indent) ? undefined : indent
-    })
+  toggleSelectionIndent (editorState, textIndent, maxIndent = 6) {
+    return textIndent <= 0 || textIndent > maxIndent || isNaN(textIndent) ? editorState : this.setSelectionBlockData(editorState, { textIndent })
+  },
+
+  increaseSelectionIndent (editorState, maxIndent = 6) {
+    const currentIndent = this.getSelectionBlockData(editorState, 'textIndent')
+    return this.setSelectionBlockData(editorState, currentIndent + 1, maxIndent)
+  },
+
+  decreaseSelectionIndent (editorState) {
+    const currentIndent = this.getSelectionBlockData(editorState, 'textIndent')
+    return this.setSelectionBlockData(editorState, currentIndent - 1)
   },
 
   toggleSelectionColor (editorState, color, colorList = []) {

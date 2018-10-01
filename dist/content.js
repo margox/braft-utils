@@ -149,12 +149,20 @@ exports.default = {
       textAlign: this.getSelectionBlockData(editorState, 'textAlign') !== alignment ? alignment : undefined
     });
   },
-  toggleSelectionIndent: function toggleSelectionIndent(editorState, indent) {
-    var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 6;
+  toggleSelectionIndent: function toggleSelectionIndent(editorState, textIndent) {
+    var maxIndent = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 6;
 
-    return this.setSelectionBlockData(editorState, {
-      textIndent: indent <= 0 || indent > max || isNaN(indent) ? undefined : indent
-    });
+    return textIndent <= 0 || textIndent > maxIndent || isNaN(textIndent) ? editorState : this.setSelectionBlockData(editorState, { textIndent: textIndent });
+  },
+  increaseSelectionIndent: function increaseSelectionIndent(editorState) {
+    var maxIndent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 6;
+
+    var currentIndent = this.getSelectionBlockData(editorState, 'textIndent');
+    return this.setSelectionBlockData(editorState, currentIndent + 1, maxIndent);
+  },
+  decreaseSelectionIndent: function decreaseSelectionIndent(editorState) {
+    var currentIndent = this.getSelectionBlockData(editorState, 'textIndent');
+    return this.setSelectionBlockData(editorState, currentIndent - 1);
   },
   toggleSelectionColor: function toggleSelectionColor(editorState, color) {
     var colorList = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
