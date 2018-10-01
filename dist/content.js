@@ -8,8 +8,6 @@ var _draftJs = require('draft-js');
 
 var _draftjsUtils = require('draftjs-utils');
 
-var _color = require('./color');
-
 var _braftConvert = require('braft-convert');
 
 exports.default = {
@@ -64,12 +62,15 @@ exports.default = {
   },
   setSelectionBlockData: function setSelectionBlockData(editorState, blockData, override) {
 
-    if (override) {
-      return (0, _draftjsUtils.setBlockData)(editorState, blockData);
-    } else {
-      var allBlockData = this.getSelectionBlockData(editorState).toJS();
-      return (0, _draftjsUtils.setBlockData)(editorState, Object.assign({}, allBlockData, blockData));
-    }
+    var newBlockData = override ? blockData : Object.assign({}, this.getSelectionBlockData(editorState).toJS(), blockData);
+
+    Object.keys(newBlockData).forEach(function (key) {
+      if (newBlockData.hasOwnProperty(key) && newBlockData[key] === undefined) {
+        delete newBlockData[key];
+      }
+    });
+
+    return (0, _draftjsUtils.setBlockData)(editorState, newBlockData);
   },
   getSelectionBlockData: function getSelectionBlockData(editorState, name) {
     var blockData = this.getSelectionBlock(editorState).getData();
@@ -159,11 +160,11 @@ exports.default = {
   increaseSelectionIndent: function increaseSelectionIndent(editorState) {
     var maxIndent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 6;
 
-    var currentIndent = this.getSelectionBlockData(editorState, 'textIndent');
+    var currentIndent = this.getSelectionBlockData(editorState, 'textIndent') || 0;
     return this.toggleSelectionIndent(editorState, currentIndent + 1, maxIndent);
   },
   decreaseSelectionIndent: function decreaseSelectionIndent(editorState) {
-    var currentIndent = this.getSelectionBlockData(editorState, 'textIndent');
+    var currentIndent = this.getSelectionBlockData(editorState, 'textIndent') || 0;
     return this.toggleSelectionIndent(editorState, currentIndent - 1);
   },
   toggleSelectionColor: function toggleSelectionColor(editorState, color) {

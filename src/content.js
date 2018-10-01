@@ -1,6 +1,5 @@
 import { Modifier, EditorState, SelectionState, RichUtils, AtomicBlockUtils, convertFromRaw } from 'draft-js'
 import { setBlockData, getSelectionEntity, removeAllInlineStyles, handleNewLine } from 'draftjs-utils'
-import { detectColorsFromHTMLString, detectColorsFromDraftState } from './color'
 import { convertHTMLToRaw } from 'braft-convert'
 
 export default {
@@ -63,12 +62,15 @@ export default {
 
   setSelectionBlockData (editorState, blockData, override) {
 
-    if (override) {
-      return setBlockData(editorState, blockData)
-    } else {
-      const allBlockData = this.getSelectionBlockData(editorState).toJS()
-      return setBlockData(editorState, Object.assign({}, allBlockData, blockData))
-    }
+    let newBlockData = override ? blockData : Object.assign({}, this.getSelectionBlockData(editorState).toJS(), blockData)
+
+    Object.keys(newBlockData).forEach(key => {
+      if (newBlockData.hasOwnProperty(key) && newBlockData[key] === undefined) {
+        delete newBlockData[key]
+      }
+    })
+
+    return setBlockData(editorState, newBlockData)
 
   },
 
@@ -163,12 +165,12 @@ export default {
   },
 
   increaseSelectionIndent (editorState, maxIndent = 6) {
-    const currentIndent = this.getSelectionBlockData(editorState, 'textIndent')
+    const currentIndent = this.getSelectionBlockData(editorState, 'textIndent') || 0
     return this.toggleSelectionIndent(editorState, currentIndent + 1, maxIndent)
   },
 
   decreaseSelectionIndent (editorState) {
-    const currentIndent = this.getSelectionBlockData(editorState, 'textIndent')
+    const currentIndent = this.getSelectionBlockData(editorState, 'textIndent') || 0
     return this.toggleSelectionIndent(editorState, currentIndent - 1)
   },
 
