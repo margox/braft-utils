@@ -152,17 +152,19 @@ exports.default = {
   toggleSelectionIndent: function toggleSelectionIndent(editorState, textIndent) {
     var maxIndent = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 6;
 
-    return textIndent <= 0 || textIndent > maxIndent || isNaN(textIndent) ? editorState : this.setSelectionBlockData(editorState, { textIndent: textIndent });
+    return textIndent < 0 || textIndent > maxIndent || isNaN(textIndent) ? editorState : this.setSelectionBlockData(editorState, {
+      textIndent: textIndent || undefined
+    });
   },
   increaseSelectionIndent: function increaseSelectionIndent(editorState) {
     var maxIndent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 6;
 
     var currentIndent = this.getSelectionBlockData(editorState, 'textIndent');
-    return this.setSelectionBlockData(editorState, currentIndent + 1, maxIndent);
+    return this.toggleSelectionIndent(editorState, currentIndent + 1, maxIndent);
   },
   decreaseSelectionIndent: function decreaseSelectionIndent(editorState) {
     var currentIndent = this.getSelectionBlockData(editorState, 'textIndent');
-    return this.setSelectionBlockData(editorState, currentIndent - 1);
+    return this.toggleSelectionIndent(editorState, currentIndent - 1);
   },
   toggleSelectionColor: function toggleSelectionColor(editorState, color) {
     var colorList = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];

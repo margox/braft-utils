@@ -157,17 +157,19 @@ export default {
   },
 
   toggleSelectionIndent (editorState, textIndent, maxIndent = 6) {
-    return textIndent <= 0 || textIndent > maxIndent || isNaN(textIndent) ? editorState : this.setSelectionBlockData(editorState, { textIndent })
+    return textIndent < 0 || textIndent > maxIndent || isNaN(textIndent) ? editorState : this.setSelectionBlockData(editorState, {
+      textIndent: textIndent || undefined
+    })
   },
 
   increaseSelectionIndent (editorState, maxIndent = 6) {
     const currentIndent = this.getSelectionBlockData(editorState, 'textIndent')
-    return this.setSelectionBlockData(editorState, currentIndent + 1, maxIndent)
+    return this.toggleSelectionIndent(editorState, currentIndent + 1, maxIndent)
   },
 
   decreaseSelectionIndent (editorState) {
     const currentIndent = this.getSelectionBlockData(editorState, 'textIndent')
-    return this.setSelectionBlockData(editorState, currentIndent - 1)
+    return this.toggleSelectionIndent(editorState, currentIndent - 1)
   },
 
   toggleSelectionColor (editorState, color, colorList = []) {
