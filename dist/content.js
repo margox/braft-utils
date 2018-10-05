@@ -269,7 +269,7 @@ exports.default = {
       return _draftJs.EditorState.push(editorState, _draftJs.Modifier.insertText(contentState, selectionState, text), 'insert-text');
     }
   },
-  insertHTML: function insertHTML(editorState, htmlString) {
+  insertHTML: function insertHTML(editorState, htmlString, source) {
 
     if (!htmlString) {
       return editorState;
@@ -277,9 +277,10 @@ exports.default = {
 
     var selectionState = editorState.getSelection();
     var contentState = editorState.getCurrentContent();
+    var options = editorState.convertOptions || {};
 
     try {
-      var _convertFromRaw = (0, _draftJs.convertFromRaw)((0, _braftConvert.convertHTMLToRaw)(htmlString)),
+      var _convertFromRaw = (0, _draftJs.convertFromRaw)((0, _braftConvert.convertHTMLToRaw)(htmlString, options, source)),
           blockMap = _convertFromRaw.blockMap;
 
       return _draftJs.EditorState.push(editorState, _draftJs.Modifier.replaceWithFragment(contentState, selectionState, blockMap), 'insert-fragment');

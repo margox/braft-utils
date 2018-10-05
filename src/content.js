@@ -267,7 +267,7 @@ export default {
 
   },
 
-  insertHTML (editorState, htmlString) {
+  insertHTML (editorState, htmlString, source) {
 
     if (!htmlString) {
       return editorState
@@ -275,10 +275,11 @@ export default {
 
     const selectionState = editorState.getSelection()
     const contentState = editorState.getCurrentContent()
+    const options = editorState.convertOptions || {}
 
     try {
 
-      const { blockMap } = convertFromRaw(convertHTMLToRaw(htmlString))
+      const { blockMap } = convertFromRaw(convertHTMLToRaw(htmlString, options, source))
 
       return EditorState.push(editorState, Modifier.replaceWithFragment(
         contentState, selectionState, blockMap
