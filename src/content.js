@@ -105,20 +105,110 @@ export default {
     return RichUtils.toggleBlockType(editorState, blockType)
   },
 
+  getSelectionEntityType (editorState) {
+
+    const entityKey = getSelectionEntity(editorState)
+
+    if (entityKey) {
+      const entity = editorState.getCurrentContent().getEntity(entityKey)
+      return entity ? entity.get('type') : null
+    }
+
+    return null
+
+  },
+
   getSelectionEntityData (editorState, type) {
 
     const entityKey = getSelectionEntity(editorState)
 
     if (entityKey) {
-      let entity = editorState.getCurrentContent().getEntity(entityKey)
+      const entity = editorState.getCurrentContent().getEntity(entityKey)
       if (entity && entity.get('type') === type) {
-        let { href, target } = entity.getData()
-        return { href, target }
+        return entity.getData()
       } else {
         return {}
       }
     } else {
       return {}
+    }
+
+  },
+
+  toggleSelectionEntity (editorState, entity) {
+
+    const contentState = editorState.getCurrentContent()
+    const selectionState = editorState.getSelection()
+
+    if (selectionState.isCollapsed() || this.getSelectionBlockType(editorState) === 'atomic') {
+      return editorState
+    }
+
+    if (!entity || !entity.type) {
+      return EditorState.push(editorState, DraftModifier.applyEntity(contentState, selectionState, null), 'apply-entity')
+    }
+
+    try {
+
+      const nextContentState = contentState.createEntity(entity.type, entity.mutability, entity.data)
+      const entityKey = nextContentState.getLastCreatedEntityKey()
+
+      let nextEditorState = EditorState.set(editorState, {
+        currentContent: nextContentState
+      })
+
+      return EditorState.push(nextEditorState, DraftModifier.applyEntity(nextEditorState, selectionState, entityKey), 'apply-entity')
+
+    } catch (error) {
+      console.warn(error)
+      return editorState
+    }
+
+  },
+
+  toggleSelectionLink (editorState, href, target) {
+
+    const contentState = editorState.getCurrentContent()
+    const selectionState = editorState.getSelection()
+
+    let entityData = { href, target }
+
+    if (selectionState.isCollapsed() || this.getSelectionBlockType(editorState) === 'atomic') {
+      return editorState
+    }
+
+    if (href === false) {
+      return RichUtils.toggleLink(editorState, selectionState, null)
+    }
+
+    if (href === null) {
+      delete entityData.href
+    }
+
+    try {
+
+      const nextContentState = contentState.createEntity('LINK', 'MUTABLE', entityData)
+      const entityKey = nextContentState.getLastCreatedEntityKey()
+
+      let nextEditorState = EditorState.set(editorState, {
+        currentContent: nextContentState
+      })
+
+      nextEditorState = RichUtils.toggleLink(nextEditorState, selectionState, entityKey)
+      nextEditorState = EditorState.forceSelection(nextEditorState, selectionState.merge({
+        anchorOffset: selectionState.getEndOffset(), 
+        focusOffset: selectionState.getEndOffset()
+      }))
+
+      nextEditorState = EditorState.push(nextEditorState, Modifier.insertText(
+        nextEditorState.getCurrentContent(), nextEditorState.getSelection(), ' '
+      ), 'insert-text')
+
+      return nextEditorState
+
+    } catch (error) {
+      console.warn(error)
+      return editorState
     }
 
   },
@@ -198,71 +288,27 @@ export default {
     return this.toggleSelectionInlineStyle(editorState, 'LETTERSPACING-' + letterSpacing, letterSpacingList.map(item => 'LETTERSPACING-' + item))
   },
 
-  toggleSelectionLink (editorState, href, target) {
+  insertText (editorState, text, inlineStyle, entity) {
 
     const selectionState = editorState.getSelection()
-    const contentState = editorState.getCurrentContent()
-
-    let entityData = { href, target }
-
-    if (selectionState.isCollapsed() || this.getSelectionBlockType(editorState) === 'atomic') {
-      return editorState
-    }
-
-    if (href === false) {
-      return RichUtils.toggleLink(editorState, selectionState, null)
-    }
-
-    if (href === null) {
-      delete entityData.href
-    }
-
-    try {
-
-      const nextContentState = contentState.createEntity('LINK', 'MUTABLE', entityData)
-      const entityKey = nextContentState.getLastCreatedEntityKey()
-
-      let nextEditorState = EditorState.set(editorState, {
-        currentContent: nextContentState
-      })
-
-      nextEditorState = RichUtils.toggleLink(nextEditorState, selectionState, entityKey)
-      nextEditorState = EditorState.forceSelection(nextEditorState, selectionState.merge({
-        anchorOffset: selectionState.getEndOffset(), 
-        focusOffset: selectionState.getEndOffset()
-      }))
-
-      nextEditorState = EditorState.push(nextEditorState, Modifier.insertText(
-        nextEditorState.getCurrentContent(), nextEditorState.getSelection(), ' '
-      ), 'insert-text')
-
-      return nextEditorState
-
-    } catch (error) {
-      console.warn(error)
-      return editorState
-    }
-
-  },
-
-  insertText (editorState, text, replace = true) {
-
-    const selectionState = editorState.getSelection()
-    const contentState = editorState.getCurrentContent()
     const currentSelectedBlockType = this.getSelectionBlockType(editorState)
 
     if (currentSelectedBlockType === 'atomic') {
       return editorState
     }
 
+    let entityKey
+    let contentState = editorState.getCurrentContent()
+
+    if (entity && entity.type) {
+      contentState = contentState.createEntity(entity.type, entity.mutability || 'MUTABLE', entity.data || entityData)
+      entityKey = contentState.getLastCreatedEntityKey()
+    }
+
     if (!selectionState.isCollapsed()) {
-      return replace ? EditorState.push(editorState, Modifier.replaceText(
-        contentState, selectionState, text
-      ), 'replace-text') : editorState
+      return EditorState.push(editorState, Modifier.replaceText(contentState, selectionState, text, inlineStyle, entityKey), 'replace-text')
     } else {
-      return EditorState.push(editorState, Modifier.insertText(
-        contentState, selectionState, text
-      ), 'insert-text')
+      return EditorState.push(editorState, Modifier.insertText(contentState, selectionState, text, inlineStyle, entityKey), 'insert-text')
     }
 
   },

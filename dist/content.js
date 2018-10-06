@@ -98,6 +98,17 @@ exports.default = {
   toggleSelectionBlockType: function toggleSelectionBlockType(editorState, blockType) {
     return _draftJs.RichUtils.toggleBlockType(editorState, blockType);
   },
+  getSelectionEntityType: function getSelectionEntityType(editorState) {
+
+    var entityKey = (0, _draftjsUtils.getSelectionEntity)(editorState);
+
+    if (entityKey) {
+      var entity = editorState.getCurrentContent().getEntity(entityKey);
+      return entity ? entity.get('type') : null;
+    }
+
+    return null;
+  },
   getSelectionEntityData: function getSelectionEntityData(editorState, type) {
 
     var entityKey = (0, _draftjsUtils.getSelectionEntity)(editorState);
@@ -105,16 +116,82 @@ exports.default = {
     if (entityKey) {
       var entity = editorState.getCurrentContent().getEntity(entityKey);
       if (entity && entity.get('type') === type) {
-        var _entity$getData = entity.getData(),
-            href = _entity$getData.href,
-            target = _entity$getData.target;
-
-        return { href: href, target: target };
+        return entity.getData();
       } else {
         return {};
       }
     } else {
       return {};
+    }
+  },
+  toggleSelectionEntity: function toggleSelectionEntity(editorState, entity) {
+
+    var contentState = editorState.getCurrentContent();
+    var selectionState = editorState.getSelection();
+
+    if (selectionState.isCollapsed() || this.getSelectionBlockType(editorState) === 'atomic') {
+      return editorState;
+    }
+
+    if (!entity || !entity.type) {
+      return _draftJs.EditorState.push(editorState, DraftModifier.applyEntity(contentState, selectionState, null), 'apply-entity');
+    }
+
+    try {
+
+      var nextContentState = contentState.createEntity(entity.type, entity.mutability, entity.data);
+      var entityKey = nextContentState.getLastCreatedEntityKey();
+
+      var nextEditorState = _draftJs.EditorState.set(editorState, {
+        currentContent: nextContentState
+      });
+
+      return _draftJs.EditorState.push(nextEditorState, DraftModifier.applyEntity(nextEditorState, selectionState, entityKey), 'apply-entity');
+    } catch (error) {
+      console.warn(error);
+      return editorState;
+    }
+  },
+  toggleSelectionLink: function toggleSelectionLink(editorState, href, target) {
+
+    var contentState = editorState.getCurrentContent();
+    var selectionState = editorState.getSelection();
+
+    var entityData = { href: href, target: target };
+
+    if (selectionState.isCollapsed() || this.getSelectionBlockType(editorState) === 'atomic') {
+      return editorState;
+    }
+
+    if (href === false) {
+      return _draftJs.RichUtils.toggleLink(editorState, selectionState, null);
+    }
+
+    if (href === null) {
+      delete entityData.href;
+    }
+
+    try {
+
+      var nextContentState = contentState.createEntity('LINK', 'MUTABLE', entityData);
+      var entityKey = nextContentState.getLastCreatedEntityKey();
+
+      var nextEditorState = _draftJs.EditorState.set(editorState, {
+        currentContent: nextContentState
+      });
+
+      nextEditorState = _draftJs.RichUtils.toggleLink(nextEditorState, selectionState, entityKey);
+      nextEditorState = _draftJs.EditorState.forceSelection(nextEditorState, selectionState.merge({
+        anchorOffset: selectionState.getEndOffset(),
+        focusOffset: selectionState.getEndOffset()
+      }));
+
+      nextEditorState = _draftJs.EditorState.push(nextEditorState, _draftJs.Modifier.insertText(nextEditorState.getCurrentContent(), nextEditorState.getSelection(), ' '), 'insert-text');
+
+      return nextEditorState;
+    } catch (error) {
+      console.warn(error);
+      return editorState;
     }
   },
   getSelectionInlineStyle: function getSelectionInlineStyle(editorState) {
@@ -209,64 +286,27 @@ exports.default = {
       return 'LETTERSPACING-' + item;
     }));
   },
-  toggleSelectionLink: function toggleSelectionLink(editorState, href, target) {
+  insertText: function insertText(editorState, text, inlineStyle, entity) {
 
     var selectionState = editorState.getSelection();
-    var contentState = editorState.getCurrentContent();
-
-    var entityData = { href: href, target: target };
-
-    if (selectionState.isCollapsed() || this.getSelectionBlockType(editorState) === 'atomic') {
-      return editorState;
-    }
-
-    if (href === false) {
-      return _draftJs.RichUtils.toggleLink(editorState, selectionState, null);
-    }
-
-    if (href === null) {
-      delete entityData.href;
-    }
-
-    try {
-
-      var nextContentState = contentState.createEntity('LINK', 'MUTABLE', entityData);
-      var entityKey = nextContentState.getLastCreatedEntityKey();
-
-      var nextEditorState = _draftJs.EditorState.set(editorState, {
-        currentContent: nextContentState
-      });
-
-      nextEditorState = _draftJs.RichUtils.toggleLink(nextEditorState, selectionState, entityKey);
-      nextEditorState = _draftJs.EditorState.forceSelection(nextEditorState, selectionState.merge({
-        anchorOffset: selectionState.getEndOffset(),
-        focusOffset: selectionState.getEndOffset()
-      }));
-
-      nextEditorState = _draftJs.EditorState.push(nextEditorState, _draftJs.Modifier.insertText(nextEditorState.getCurrentContent(), nextEditorState.getSelection(), ' '), 'insert-text');
-
-      return nextEditorState;
-    } catch (error) {
-      console.warn(error);
-      return editorState;
-    }
-  },
-  insertText: function insertText(editorState, text) {
-    var replace = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
-
-    var selectionState = editorState.getSelection();
-    var contentState = editorState.getCurrentContent();
     var currentSelectedBlockType = this.getSelectionBlockType(editorState);
 
     if (currentSelectedBlockType === 'atomic') {
       return editorState;
     }
 
+    var entityKey = void 0;
+    var contentState = editorState.getCurrentContent();
+
+    if (entity && entity.type) {
+      contentState = contentState.createEntity(entity.type, entity.mutability || 'MUTABLE', entity.data || entityData);
+      entityKey = contentState.getLastCreatedEntityKey();
+    }
+
     if (!selectionState.isCollapsed()) {
-      return replace ? _draftJs.EditorState.push(editorState, _draftJs.Modifier.replaceText(contentState, selectionState, text), 'replace-text') : editorState;
+      return _draftJs.EditorState.push(editorState, _draftJs.Modifier.replaceText(contentState, selectionState, text, inlineStyle, entityKey), 'replace-text');
     } else {
-      return _draftJs.EditorState.push(editorState, _draftJs.Modifier.insertText(contentState, selectionState, text), 'insert-text');
+      return _draftJs.EditorState.push(editorState, _draftJs.Modifier.insertText(contentState, selectionState, text, inlineStyle, entityKey), 'insert-text');
     }
   },
   insertHTML: function insertHTML(editorState, htmlString, source) {
