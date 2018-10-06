@@ -144,7 +144,7 @@ export default {
       return editorState
     }
 
-    if (!entity || !entity.type) {
+    if (!entity || !entity.type || this.getSelectionEntityType(editorState) === entity.type) {
       return EditorState.push(editorState, Modifier.applyEntity(contentState, selectionState, null), 'apply-entity')
     }
 
@@ -157,7 +157,7 @@ export default {
         currentContent: nextContentState
       })
 
-      return EditorState.push(nextEditorState, Modifier.applyEntity(nextEditorState, selectionState, entityKey), 'apply-entity')
+      return EditorState.push(nextEditorState, Modifier.applyEntity(nextContentState, selectionState, entityKey), 'apply-entity')
 
     } catch (error) {
       console.warn(error)
