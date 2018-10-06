@@ -145,7 +145,7 @@ export default {
     }
 
     if (!entity || !entity.type) {
-      return EditorState.push(editorState, DraftModifier.applyEntity(contentState, selectionState, null), 'apply-entity')
+      return EditorState.push(editorState, Modifier.applyEntity(contentState, selectionState, null), 'apply-entity')
     }
 
     try {
@@ -157,7 +157,7 @@ export default {
         currentContent: nextContentState
       })
 
-      return EditorState.push(nextEditorState, DraftModifier.applyEntity(nextEditorState, selectionState, entityKey), 'apply-entity')
+      return EditorState.push(nextEditorState, Modifier.applyEntity(nextEditorState, selectionState, entityKey), 'apply-entity')
 
     } catch (error) {
       console.warn(error)

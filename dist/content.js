@@ -134,7 +134,7 @@ exports.default = {
     }
 
     if (!entity || !entity.type) {
-      return _draftJs.EditorState.push(editorState, DraftModifier.applyEntity(contentState, selectionState, null), 'apply-entity');
+      return _draftJs.EditorState.push(editorState, _draftJs.Modifier.applyEntity(contentState, selectionState, null), 'apply-entity');
     }
 
     try {
@@ -146,7 +146,7 @@ exports.default = {
         currentContent: nextContentState
       });
 
-      return _draftJs.EditorState.push(nextEditorState, DraftModifier.applyEntity(nextEditorState, selectionState, entityKey), 'apply-entity');
+      return _draftJs.EditorState.push(nextEditorState, _draftJs.Modifier.applyEntity(nextEditorState, selectionState, entityKey), 'apply-entity');
     } catch (error) {
       console.warn(error);
       return editorState;
