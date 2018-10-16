@@ -1,4 +1,4 @@
-const namedColors = {
+const _namedColors = {
   "aliceblue": "#f0f8ff",
   "antiquewhite": "#faebd7",
   "aqua": "#00ffff",
@@ -142,7 +142,7 @@ const namedColors = {
   "yellowgreen": "#9acd32"
 }
 
-const getHexColor = (color) => {
+const _getHexColor = (color) => {
 
   color = color.replace('color:', '').replace(';', '').replace(' ', '')
 
@@ -166,34 +166,31 @@ const getHexColor = (color) => {
 
 }
 
-export default {
+export const namedColors = _namedColors
+export const getHexColor = _getHexColor
 
-  namedColors, getHexColor,
+export const detectColorsFromHTMLString = (html) => {
+  return typeof html !== 'string' ? [] : (html.match(/color:[^;]{3,24};/g) || []).map(getHexColor).filter(color => color)
+}
 
-  detectColorsFromHTMLString (html) {
-    return typeof html !== 'string' ? [] : (html.match(/color:[^;]{3,24};/g) || []).map(getHexColor).filter(color => color)
-  },
+export const detectColorsFromDraftState = (draftState) => {
 
-  detectColorsFromDraftState (draftState) {
+  let result = []
 
-    let result = []
-
-    if (!draftState || !draftState.blocks || !draftState.blocks.length) {
-      return result
-    }
-
-    draftState.blocks.forEach((block) => {
-      if (block && block.inlineStyleRanges && block.inlineStyleRanges.length) {
-        block.inlineStyleRanges.forEach((inlineStyle) => {
-          if (inlineStyle.style && inlineStyle.style.indexOf('COLOR-') >= 0) {
-            result.push('#' + inlineStyle.style.split('COLOR-')[1])
-          }
-        }) 
-      }
-    })
-
-    return result.filter(color => color)
-
+  if (!draftState || !draftState.blocks || !draftState.blocks.length) {
+    return result
   }
+
+  draftState.blocks.forEach((block) => {
+    if (block && block.inlineStyleRanges && block.inlineStyleRanges.length) {
+      block.inlineStyleRanges.forEach((inlineStyle) => {
+        if (inlineStyle.style && inlineStyle.style.indexOf('COLOR-') >= 0) {
+          result.push('#' + inlineStyle.style.split('COLOR-')[1])
+        }
+      }) 
+    }
+  })
+
+  return result.filter(color => color)
 
 }

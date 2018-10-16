@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var namedColors = {
+var _namedColors = {
   "aliceblue": "#f0f8ff",
   "antiquewhite": "#faebd7",
   "aqua": "#00ffff",
@@ -147,7 +147,7 @@ var namedColors = {
   "yellowgreen": "#9acd32"
 };
 
-var getHexColor = function getHexColor(color) {
+var _getHexColor = function _getHexColor(color) {
 
   color = color.replace('color:', '').replace(';', '').replace(' ', '');
 
@@ -170,36 +170,35 @@ var getHexColor = function getHexColor(color) {
   }
 };
 
-exports.default = {
+var namedColors = exports.namedColors = _namedColors;
+var getHexColor = exports.getHexColor = _getHexColor;
 
-  namedColors: namedColors, getHexColor: getHexColor,
+var detectColorsFromHTMLString = exports.detectColorsFromHTMLString = function detectColorsFromHTMLString(html) {
+  return typeof html !== 'string' ? [] : (html.match(/color:[^;]{3,24};/g) || []).map(getHexColor).filter(function (color) {
+    return color;
+  });
+};
 
-  detectColorsFromHTMLString: function detectColorsFromHTMLString(html) {
-    return typeof html !== 'string' ? [] : (html.match(/color:[^;]{3,24};/g) || []).map(getHexColor).filter(function (color) {
-      return color;
-    });
-  },
-  detectColorsFromDraftState: function detectColorsFromDraftState(draftState) {
+var detectColorsFromDraftState = exports.detectColorsFromDraftState = function detectColorsFromDraftState(draftState) {
 
-    var result = [];
+  var result = [];
 
-    if (!draftState || !draftState.blocks || !draftState.blocks.length) {
-      return result;
-    }
-
-    draftState.blocks.forEach(function (block) {
-      if (block && block.inlineStyleRanges && block.inlineStyleRanges.length) {
-        block.inlineStyleRanges.forEach(function (inlineStyle) {
-          if (inlineStyle.style && inlineStyle.style.indexOf('COLOR-') >= 0) {
-            result.push('#' + inlineStyle.style.split('COLOR-')[1]);
-          }
-        });
-      }
-    });
-
-    return result.filter(function (color) {
-      return color;
-    });
+  if (!draftState || !draftState.blocks || !draftState.blocks.length) {
+    return result;
   }
+
+  draftState.blocks.forEach(function (block) {
+    if (block && block.inlineStyleRanges && block.inlineStyleRanges.length) {
+      block.inlineStyleRanges.forEach(function (inlineStyle) {
+        if (inlineStyle.style && inlineStyle.style.indexOf('COLOR-') >= 0) {
+          result.push('#' + inlineStyle.style.split('COLOR-')[1]);
+        }
+      });
+    }
+  });
+
+  return result.filter(function (color) {
+    return color;
+  });
 };
 //# sourceMappingURL=color.js.map

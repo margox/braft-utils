@@ -1,5 +1,3 @@
 let braftUniqueIndex = 0
 
-export default {
-  UniqueIndex: () => braftUniqueIndex += 1
-}
+export const UniqueIndex = () => braftUniqueIndex += 1
