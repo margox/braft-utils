@@ -201,4 +201,3 @@ var detectColorsFromDraftState = exports.detectColorsFromDraftState = function d
     return color;
   });
 };
-//# sourceMappingURL=color.js.map

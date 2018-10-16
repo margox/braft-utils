@@ -224,16 +224,14 @@ export const toggleSelectionInlineStyle = (editorState, style, prefix) => {
   const selectionState = editorState.getSelection()
   const contentState = editorState.getCurrentContent()
 
-  style = style.toUpperCase()
+  style = prefix + style.toUpperCase()
 
-  const stylesToBeRemoved = prefix ? editorState.getCurrentInlineStyle().toJS().filter(item => item.indexOf(prefix) === 0) : []
+  const stylesToBeRemoved = prefix ? editorState.getCurrentInlineStyle().toJS().filter(item => item.indexOf(prefix) === 0 && item !== style) : []
 
   let nextEditorState = stylesToBeRemoved.length ? stylesToBeRemoved.reduce((editorState, item) => {
-    // return Modifier.removeInlineStyle(contentState, selectionState, item)
     return RichUtils.toggleInlineStyle(editorState, item)
   }, editorState) : editorState
 
-  // const nextEditorState = stylesToBeRemoved.length ? EditorState.push(editorState, nextContentState, 'change-inline-style') : editorState
   return RichUtils.toggleInlineStyle(nextEditorState, style)
 
 }
@@ -269,8 +267,8 @@ export const toggleSelectionColor = (editorState, color) => {
 }
 
 export const toggleSelectionBackgroundColor = (editorState, color) => {
-    return toggleSelectionInlineStyle(editorState, color.replace('#', ''), 'BGCOLOR-')
-  }
+  return toggleSelectionInlineStyle(editorState, color.replace('#', ''), 'BGCOLOR-')
+}
 
 export const toggleSelectionFontSize = (editorState, fontSize) => {
   return toggleSelectionInlineStyle(editorState, fontSize, 'FONTSIZE-')

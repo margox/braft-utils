@@ -224,18 +224,16 @@ var toggleSelectionInlineStyle = exports.toggleSelectionInlineStyle = function t
   var selectionState = editorState.getSelection();
   var contentState = editorState.getCurrentContent();
 
-  style = style.toUpperCase();
+  style = prefix + style.toUpperCase();
 
   var stylesToBeRemoved = prefix ? editorState.getCurrentInlineStyle().toJS().filter(function (item) {
-    return item.indexOf(prefix) === 0;
+    return item.indexOf(prefix) === 0 && item !== style;
   }) : [];
 
   var nextEditorState = stylesToBeRemoved.length ? stylesToBeRemoved.reduce(function (editorState, item) {
-    // return Modifier.removeInlineStyle(contentState, selectionState, item)
     return _draftJs.RichUtils.toggleInlineStyle(editorState, item);
   }, editorState) : editorState;
 
-  // const nextEditorState = stylesToBeRemoved.length ? EditorState.push(editorState, nextContentState, 'change-inline-style') : editorState
   return _draftJs.RichUtils.toggleInlineStyle(nextEditorState, style);
 };
 
@@ -440,4 +438,3 @@ var undo = exports.undo = function undo(editorState) {
 var redo = exports.redo = function redo(editorState) {
   return _draftJs.EditorState.redo(editorState);
 };
-//# sourceMappingURL=content.js.map
