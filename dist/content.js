@@ -219,10 +219,9 @@ var selectionHasInlineStyle = exports.selectionHasInlineStyle = function selecti
   return getSelectionInlineStyle(editorState).has(style.toUpperCase());
 };
 
-var toggleSelectionInlineStyle = exports.toggleSelectionInlineStyle = function toggleSelectionInlineStyle(editorState, style, prefix) {
+var toggleSelectionInlineStyle = exports.toggleSelectionInlineStyle = function toggleSelectionInlineStyle(editorState, style) {
+  var prefix = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
 
-  var selectionState = editorState.getSelection();
-  var contentState = editorState.getCurrentContent();
 
   style = prefix + style.toUpperCase();
 

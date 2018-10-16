@@ -219,10 +219,7 @@ export const selectionHasInlineStyle = (editorState, style) => {
   return getSelectionInlineStyle(editorState).has(style.toUpperCase())
 }
 
-export const toggleSelectionInlineStyle = (editorState, style, prefix) => {
-
-  const selectionState = editorState.getSelection()
-  const contentState = editorState.getCurrentContent()
+export const toggleSelectionInlineStyle = (editorState, style, prefix = '') => {
 
   style = prefix + style.toUpperCase()
 
