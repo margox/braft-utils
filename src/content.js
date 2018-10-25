@@ -365,8 +365,8 @@ export const insertMedias = (editorState, medias = []) => {
   }
 
   return medias.reduce((editorState, media) => {
-    const { url, name, type, meta } = media
-    const contentStateWithEntity = editorState.getCurrentContent().createEntity(type, 'IMMUTABLE', { url, name, type, meta })
+    const { url, name, type, width, height, meta } = media
+    const contentStateWithEntity = editorState.getCurrentContent().createEntity(type, 'IMMUTABLE', { url, name, type, width, height, meta })
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey()
     return AtomicBlockUtils.insertAtomicBlock(editorState, entityKey, ' ')
   }, editorState)

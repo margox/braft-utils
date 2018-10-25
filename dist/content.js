@@ -374,9 +374,11 @@ var insertMedias = exports.insertMedias = function insertMedias(editorState) {
     var url = media.url,
         name = media.name,
         type = media.type,
+        width = media.width,
+        height = media.height,
         meta = media.meta;
 
-    var contentStateWithEntity = editorState.getCurrentContent().createEntity(type, 'IMMUTABLE', { url: url, name: name, type: type, meta: meta });
+    var contentStateWithEntity = editorState.getCurrentContent().createEntity(type, 'IMMUTABLE', { url: url, name: name, type: type, width: width, height: height, meta: meta });
     var entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     return _draftJs.AtomicBlockUtils.insertAtomicBlock(editorState, entityKey, ' ');
   }, editorState);
