@@ -58,6 +58,31 @@ export const getSelectionBlock = (editorState) => {
   return editorState.getCurrentContent().getBlockForKey(editorState.getSelection().getAnchorKey())
 }
 
+export const getSelectedBlocks = (editorState) => {
+
+  const selectionState = editorState.getSelection()
+  const contentState = editorState.getCurrentContent()
+
+  const startKey = selectionState.getStartKey()
+  const endKey = selectionState.getEndKey()
+  const isSameBlock = startKey === endKey
+  const startingBlock = contentState.getBlockForKey(startKey)
+  const selectedBlocks = [startingBlock]
+
+  if (!isSameBlock) {
+    let blockKey = startKey
+
+    while (blockKey !== endKey) {
+      const nextBlock = contentState.getBlockAfter(blockKey)
+      selectedBlocks.push(nextBlock)
+      blockKey = nextBlock.getKey()
+    }
+  }
+
+  return selectedBlocks
+
+}
+
 export const setSelectionBlockData = (editorState, blockData, override) => {
 
   let newBlockData = override ? blockData : Object.assign({}, getSelectionBlockData(editorState).toJS(), blockData)

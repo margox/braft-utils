@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.redo = exports.undo = exports.handleKeyCommand = exports.clear = exports.setMediaPosition = exports.removeMedia = exports.setMediaData = exports.insertMedias = exports.insertHorizontalLine = exports.insertAtomicBlock = exports.insertHTML = exports.insertText = exports.toggleSelectionLetterSpacing = exports.toggleSelectionFontFamily = exports.toggleSelectionLineHeight = exports.toggleSelectionFontSize = exports.toggleSelectionBackgroundColor = exports.toggleSelectionColor = exports.decreaseSelectionIndent = exports.increaseSelectionIndent = exports.toggleSelectionIndent = exports.toggleSelectionAlignment = exports.removeSelectionInlineStyles = exports.toggleSelectionInlineStyle = exports.selectionHasInlineStyle = exports.getSelectionInlineStyle = exports.toggleSelectionLink = exports.toggleSelectionEntity = exports.getSelectionEntityData = exports.getSelectionEntityType = exports.toggleSelectionBlockType = exports.getSelectionText = exports.getSelectionBlockType = exports.getSelectionBlockData = exports.setSelectionBlockData = exports.getSelectionBlock = exports.removeBlock = exports.selectNextBlock = exports.selectBlock = exports.isSelectionCollapsed = exports.createEditorState = exports.createEmptyEditorState = exports.isEditorState = undefined;
+exports.redo = exports.undo = exports.handleKeyCommand = exports.clear = exports.setMediaPosition = exports.removeMedia = exports.setMediaData = exports.insertMedias = exports.insertHorizontalLine = exports.insertAtomicBlock = exports.insertHTML = exports.insertText = exports.toggleSelectionLetterSpacing = exports.toggleSelectionFontFamily = exports.toggleSelectionLineHeight = exports.toggleSelectionFontSize = exports.toggleSelectionBackgroundColor = exports.toggleSelectionColor = exports.decreaseSelectionIndent = exports.increaseSelectionIndent = exports.toggleSelectionIndent = exports.toggleSelectionAlignment = exports.removeSelectionInlineStyles = exports.toggleSelectionInlineStyle = exports.selectionHasInlineStyle = exports.getSelectionInlineStyle = exports.toggleSelectionLink = exports.toggleSelectionEntity = exports.getSelectionEntityData = exports.getSelectionEntityType = exports.toggleSelectionBlockType = exports.getSelectionText = exports.getSelectionBlockType = exports.getSelectionBlockData = exports.setSelectionBlockData = exports.getSelectedBlocks = exports.getSelectionBlock = exports.removeBlock = exports.selectNextBlock = exports.selectBlock = exports.isSelectionCollapsed = exports.createEditorState = exports.createEmptyEditorState = exports.isEditorState = undefined;
 
 var _draftJs = require('draft-js');
 
@@ -66,6 +66,30 @@ var removeBlock = exports.removeBlock = function removeBlock(editorState, block)
 
 var getSelectionBlock = exports.getSelectionBlock = function getSelectionBlock(editorState) {
   return editorState.getCurrentContent().getBlockForKey(editorState.getSelection().getAnchorKey());
+};
+
+var getSelectedBlocks = exports.getSelectedBlocks = function getSelectedBlocks(editorState) {
+
+  var selectionState = editorState.getSelection();
+  var contentState = editorState.getCurrentContent();
+
+  var startKey = selectionState.getStartKey();
+  var endKey = selectionState.getEndKey();
+  var isSameBlock = startKey === endKey;
+  var startingBlock = contentState.getBlockForKey(startKey);
+  var selectedBlocks = [startingBlock];
+
+  if (!isSameBlock) {
+    var blockKey = startKey;
+
+    while (blockKey !== endKey) {
+      var nextBlock = contentState.getBlockAfter(blockKey);
+      selectedBlocks.push(nextBlock);
+      blockKey = nextBlock.getKey();
+    }
+  }
+
+  return selectedBlocks;
 };
 
 var setSelectionBlockData = exports.setSelectionBlockData = function setSelectionBlockData(editorState, blockData, override) {
