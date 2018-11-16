@@ -3,13 +3,19 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.redo = exports.undo = exports.handleKeyCommand = exports.clear = exports.setMediaPosition = exports.removeMedia = exports.setMediaData = exports.insertMedias = exports.insertHorizontalLine = exports.insertAtomicBlock = exports.insertHTML = exports.insertText = exports.toggleSelectionLetterSpacing = exports.toggleSelectionFontFamily = exports.toggleSelectionLineHeight = exports.toggleSelectionFontSize = exports.toggleSelectionBackgroundColor = exports.toggleSelectionColor = exports.decreaseSelectionIndent = exports.increaseSelectionIndent = exports.toggleSelectionIndent = exports.toggleSelectionAlignment = exports.removeSelectionInlineStyles = exports.toggleSelectionInlineStyle = exports.selectionHasInlineStyle = exports.getSelectionInlineStyle = exports.toggleSelectionLink = exports.toggleSelectionEntity = exports.getSelectionEntityData = exports.getSelectionEntityType = exports.toggleSelectionBlockType = exports.getSelectionText = exports.getSelectionBlockType = exports.getSelectionBlockData = exports.setSelectionBlockData = exports.getSelectedBlocks = exports.getSelectionBlock = exports.removeBlock = exports.selectNextBlock = exports.selectBlock = exports.isSelectionCollapsed = exports.createEditorState = exports.createEmptyEditorState = exports.isEditorState = undefined;
+exports.redo = exports.undo = exports.handleKeyCommand = exports.clear = exports.setMediaPosition = exports.removeMedia = exports.setMediaData = exports.insertMedias = exports.insertHorizontalLine = exports.insertAtomicBlock = exports.insertHTML = exports.insertText = exports.toggleSelectionLetterSpacing = exports.toggleSelectionFontFamily = exports.toggleSelectionLineHeight = exports.toggleSelectionFontSize = exports.toggleSelectionBackgroundColor = exports.toggleSelectionColor = exports.decreaseSelectionIndent = exports.increaseSelectionIndent = exports.toggleSelectionIndent = exports.toggleSelectionAlignment = exports.removeSelectionInlineStyles = exports.toggleSelectionInlineStyle = exports.selectionHasInlineStyle = exports.getSelectionInlineStyle = exports.toggleSelectionLink = exports.toggleSelectionEntity = exports.getSelectionEntityData = exports.getSelectionEntityType = exports.toggleSelectionBlockType = exports.getSelectionText = exports.getSelectionBlockType = exports.getSelectionBlockData = exports.setSelectionBlockData = exports.getSelectedBlocks = exports.getSelectionBlock = exports.removeBlock = exports.selectNextBlock = exports.selectBlock = exports.selectionContainsStrictBlock = exports.selectionContainsBlockType = exports.isSelectionCollapsed = exports.createEditorState = exports.createEmptyEditorState = exports.isEditorState = exports.registerStrictBlockType = undefined;
 
 var _draftJs = require('draft-js');
 
 var _draftjsUtils = require('draftjs-utils');
 
 var _braftConvert = require('braft-convert');
+
+var strictBlockTypes = ['atomic'];
+
+var registerStrictBlockType = exports.registerStrictBlockType = function registerStrictBlockType(blockType) {
+  strictBlockTypes.indexOf(blockType) === -1 && strictBlockTypes.push(blockType);
+};
 
 var isEditorState = exports.isEditorState = function isEditorState(editorState) {
   return editorState instanceof _draftJs.EditorState;
@@ -25,6 +31,18 @@ var createEditorState = exports.createEditorState = function createEditorState(c
 
 var isSelectionCollapsed = exports.isSelectionCollapsed = function isSelectionCollapsed(editorState) {
   return editorState.getSelection().isCollapsed();
+};
+
+var selectionContainsBlockType = exports.selectionContainsBlockType = function selectionContainsBlockType(editorState, blockType) {
+  return getSelectedBlocks(editorState).find(function (block) {
+    return block.getType() === blockType;
+  });
+};
+
+var selectionContainsStrictBlock = exports.selectionContainsStrictBlock = function selectionContainsStrictBlock(editorState) {
+  return getSelectedBlocks(editorState).find(function (block) {
+    return ~strictBlockTypes.indexOf(block.getType());
+  });
 };
 
 var selectBlock = exports.selectBlock = function selectBlock(editorState, block) {
@@ -132,6 +150,11 @@ var getSelectionText = exports.getSelectionText = function getSelectionText(edit
 };
 
 var toggleSelectionBlockType = exports.toggleSelectionBlockType = function toggleSelectionBlockType(editorState, blockType) {
+
+  if (selectionContainsStrictBlock(editorState)) {
+    return editorState;
+  }
+
   return _draftJs.RichUtils.toggleBlockType(editorState, blockType);
 };
 
@@ -364,6 +387,10 @@ var insertAtomicBlock = exports.insertAtomicBlock = function insertAtomicBlock(e
   var data = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 
 
+  if (selectionContainsStrictBlock(editorState)) {
+    return insertAtomicBlock(selectNextBlock(editorState, getSelectionBlock(editorState)), type, immutable = true, data = {});
+  }
+
   var selectionState = editorState.getSelection();
   var contentState = editorState.getCurrentContent();
 
@@ -390,9 +417,13 @@ var insertMedias = exports.insertMedias = function insertMedias(editorState) {
     return editorState;
   }
 
-  if (getSelectionBlockType(editorState) === 'atomic') {
-    selectNextBlock(editorState, getSelectionBlock(editorState));
-  }
+  // if (selectionContainsStrictBlock(editorState)) {
+  //   return editorState
+  // }
+
+  // if (selectionContainsStrictBlock(editorState)) { 
+  //   return insertMedias(selectNextBlock(editorState, getSelectionBlock(editorState)), medias)
+  // }
 
   return medias.reduce(function (editorState, media) {
     var url = media.url,

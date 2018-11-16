@@ -2,6 +2,12 @@ import { Modifier, EditorState, SelectionState, RichUtils, AtomicBlockUtils, con
 import { setBlockData, getSelectionEntity, removeAllInlineStyles } from 'draftjs-utils'
 import { convertHTMLToRaw } from 'braft-convert'
 
+const strictBlockTypes = ['atomic']
+
+export const registerStrictBlockType = (blockType) => {
+  strictBlockTypes.indexOf(blockType) === -1 && strictBlockTypes.push(blockType)
+}
+
 export const isEditorState = (editorState) => {
   return editorState instanceof EditorState
 }
@@ -16,6 +22,14 @@ export const createEditorState = (contentState, editorDecorators) => {
 
 export const isSelectionCollapsed = (editorState) => {
   return editorState.getSelection().isCollapsed()
+}
+
+export const selectionContainsBlockType = (editorState, blockType) => {
+  return getSelectedBlocks(editorState).find(block => block.getType() === blockType)
+}
+
+export const selectionContainsStrictBlock = (editorState) => {
+  return getSelectedBlocks(editorState).find(block => ~strictBlockTypes.indexOf(block.getType()))
 }
 
 export const selectBlock = (editorState, block) => {
@@ -125,7 +139,13 @@ export const getSelectionText = (editorState) => {
 }
 
 export const toggleSelectionBlockType = (editorState, blockType) => {
+
+  if (selectionContainsStrictBlock(editorState)) {
+    return editorState
+  }
+
   return RichUtils.toggleBlockType(editorState, blockType)
+
 }
 
 export const getSelectionEntityType = (editorState) => {
@@ -360,6 +380,10 @@ export const insertHTML = (editorState, htmlString, source) => {
 
 export const insertAtomicBlock = (editorState, type, immutable = true, data = {}) => {
 
+  if (selectionContainsStrictBlock(editorState)) { 
+    return insertAtomicBlock(selectNextBlock(editorState, getSelectionBlock(editorState)), type, immutable = true, data = {})
+  }
+
   const selectionState = editorState.getSelection()
   const contentState = editorState.getCurrentContent()
 
@@ -385,9 +409,13 @@ export const insertMedias = (editorState, medias = []) => {
     return editorState
   }
 
-  if (getSelectionBlockType(editorState) === 'atomic') { 
-    selectNextBlock(editorState, getSelectionBlock(editorState))
-  }
+  // if (selectionContainsStrictBlock(editorState)) {
+  //   return editorState
+  // }
+
+  // if (selectionContainsStrictBlock(editorState)) { 
+  //   return insertMedias(selectNextBlock(editorState, getSelectionBlock(editorState)), medias)
+  // }
 
   return medias.reduce((editorState, media) => {
     const { url, name, type, width, height, meta } = media
