@@ -380,8 +380,8 @@ export const insertHTML = (editorState, htmlString, source) => {
 
 export const insertAtomicBlock = (editorState, type, immutable = true, data = {}) => {
 
-  if (selectionContainsStrictBlock(editorState)) { 
-    return insertAtomicBlock(selectNextBlock(editorState, getSelectionBlock(editorState)), type, immutable = true, data = {})
+  if (selectionContainsStrictBlock(editorState)) {
+    return insertAtomicBlock(selectNextBlock(editorState, getSelectionBlock(editorState)), type, immutable, data)
   }
 
   const selectionState = editorState.getSelection()
@@ -409,19 +409,9 @@ export const insertMedias = (editorState, medias = []) => {
     return editorState
   }
 
-  // if (selectionContainsStrictBlock(editorState)) {
-  //   return editorState
-  // }
-
-  // if (selectionContainsStrictBlock(editorState)) { 
-  //   return insertMedias(selectNextBlock(editorState, getSelectionBlock(editorState)), medias)
-  // }
-
   return medias.reduce((editorState, media) => {
     const { url, name, type, width, height, meta } = media
-    const contentStateWithEntity = editorState.getCurrentContent().createEntity(type, 'IMMUTABLE', { url, name, type, width, height, meta })
-    const entityKey = contentStateWithEntity.getLastCreatedEntityKey()
-    return AtomicBlockUtils.insertAtomicBlock(editorState, entityKey, ' ')
+    return insertAtomicBlock(editorState, type, true, { url, name, type, width, height, meta })
   }, editorState)
 
 }

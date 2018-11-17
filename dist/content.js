@@ -388,7 +388,7 @@ var insertAtomicBlock = exports.insertAtomicBlock = function insertAtomicBlock(e
 
 
   if (selectionContainsStrictBlock(editorState)) {
-    return insertAtomicBlock(selectNextBlock(editorState, getSelectionBlock(editorState)), type, immutable = true, data = {});
+    return insertAtomicBlock(selectNextBlock(editorState, getSelectionBlock(editorState)), type, immutable, data);
   }
 
   var selectionState = editorState.getSelection();
@@ -417,14 +417,6 @@ var insertMedias = exports.insertMedias = function insertMedias(editorState) {
     return editorState;
   }
 
-  // if (selectionContainsStrictBlock(editorState)) {
-  //   return editorState
-  // }
-
-  // if (selectionContainsStrictBlock(editorState)) { 
-  //   return insertMedias(selectNextBlock(editorState, getSelectionBlock(editorState)), medias)
-  // }
-
   return medias.reduce(function (editorState, media) {
     var url = media.url,
         name = media.name,
@@ -433,9 +425,7 @@ var insertMedias = exports.insertMedias = function insertMedias(editorState) {
         height = media.height,
         meta = media.meta;
 
-    var contentStateWithEntity = editorState.getCurrentContent().createEntity(type, 'IMMUTABLE', { url: url, name: name, type: type, width: width, height: height, meta: meta });
-    var entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    return _draftJs.AtomicBlockUtils.insertAtomicBlock(editorState, entityKey, ' ');
+    return insertAtomicBlock(editorState, type, true, { url: url, name: name, type: type, width: width, height: height, meta: meta });
   }, editorState);
 };
 
