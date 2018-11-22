@@ -470,7 +470,7 @@ var clear = exports.clear = function clear(editorState) {
     hasFocus: true
   });
 
-  return _draftJs.EditorState.push(editorState, _draftJs.Modifier.removeRange(contentState, allSelected, 'backward'), 'remove-range');
+  return _draftJs.RichUtils.toggleBlockType(_draftJs.EditorState.push(editorState, _draftJs.Modifier.removeRange(contentState, allSelected, 'backward'), 'remove-range'), 'unstyled');
 };
 
 var handleKeyCommand = exports.handleKeyCommand = function handleKeyCommand(editorState, command) {

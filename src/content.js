@@ -456,11 +456,11 @@ export const clear = (editorState) => {
     hasFocus: true
   })
 
-  return EditorState.push(
+  return RichUtils.toggleBlockType(EditorState.push(
     editorState,
     Modifier.removeRange(contentState, allSelected, 'backward'),
     'remove-range'
-  )
+  ), 'unstyled')
 
 }
 
