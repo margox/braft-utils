@@ -419,13 +419,15 @@ var insertMedias = exports.insertMedias = function insertMedias(editorState) {
 
   return medias.reduce(function (editorState, media) {
     var url = media.url,
+        link = media.link,
+        link_target = media.link_target,
         name = media.name,
         type = media.type,
         width = media.width,
         height = media.height,
         meta = media.meta;
 
-    return insertAtomicBlock(editorState, type, true, { url: url, name: name, type: type, width: width, height: height, meta: meta });
+    return insertAtomicBlock(editorState, type, true, { url: url, link: link, link_target: link_target, name: name, type: type, width: width, height: height, meta: meta });
   }, editorState);
 };
 

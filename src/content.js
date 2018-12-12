@@ -410,8 +410,8 @@ export const insertMedias = (editorState, medias = []) => {
   }
 
   return medias.reduce((editorState, media) => {
-    const { url, name, type, width, height, meta } = media
-    return insertAtomicBlock(editorState, type, true, { url, name, type, width, height, meta })
+    const { url, link, link_target, name, type, width, height, meta } = media
+    return insertAtomicBlock(editorState, type, true, { url, link, link_target, name, type, width, height, meta })
   }, editorState)
 
 }
