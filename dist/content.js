@@ -249,7 +249,7 @@ var toggleSelectionLink = exports.toggleSelectionLink = function toggleSelection
       focusOffset: selectionState.getEndOffset()
     }));
 
-    nextEditorState = _draftJs.EditorState.push(nextEditorState, _draftJs.Modifier.insertText(nextEditorState.getCurrentContent(), nextEditorState.getSelection(), ' '), 'insert-text');
+    nextEditorState = _draftJs.EditorState.push(nextEditorState, _draftJs.Modifier.insertText(nextEditorState.getCurrentContent(), nextEditorState.getSelection(), ''), 'insert-text');
 
     return nextEditorState;
   } catch (error) {
