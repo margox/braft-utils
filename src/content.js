@@ -244,7 +244,7 @@ export const toggleSelectionLink = (editorState, href, target) => {
     }))
 
     nextEditorState = EditorState.push(nextEditorState, Modifier.insertText(
-      nextEditorState.getCurrentContent(), nextEditorState.getSelection(), ' '
+      nextEditorState.getCurrentContent(), nextEditorState.getSelection(), ''
     ), 'insert-text')
 
     return nextEditorState
