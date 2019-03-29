@@ -3,13 +3,19 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.redo = exports.undo = exports.handleKeyCommand = exports.clear = exports.setMediaPosition = exports.removeMedia = exports.setMediaData = exports.insertMedias = exports.insertHorizontalLine = exports.insertAtomicBlock = exports.insertHTML = exports.insertText = exports.toggleSelectionLetterSpacing = exports.toggleSelectionFontFamily = exports.toggleSelectionLineHeight = exports.toggleSelectionFontSize = exports.toggleSelectionBackgroundColor = exports.toggleSelectionColor = exports.decreaseSelectionIndent = exports.increaseSelectionIndent = exports.toggleSelectionIndent = exports.toggleSelectionAlignment = exports.removeSelectionInlineStyles = exports.toggleSelectionInlineStyle = exports.selectionHasInlineStyle = exports.getSelectionInlineStyle = exports.toggleSelectionLink = exports.toggleSelectionEntity = exports.getSelectionEntityData = exports.getSelectionEntityType = exports.toggleSelectionBlockType = exports.getSelectionText = exports.getSelectionBlockType = exports.getSelectionBlockData = exports.setSelectionBlockData = exports.getSelectedBlocks = exports.getSelectionBlock = exports.removeBlock = exports.selectNextBlock = exports.selectBlock = exports.selectionContainsStrictBlock = exports.selectionContainsBlockType = exports.isSelectionCollapsed = exports.createEditorState = exports.createEmptyEditorState = exports.isEditorState = exports.registerStrictBlockType = undefined;
+exports.redo = exports.undo = exports.handleKeyCommand = exports.clear = exports.setMediaPosition = exports.removeMedia = exports.setMediaData = exports.insertMedias = exports.insertHorizontalLine = exports.insertAtomicBlock = exports.insertHTML = exports.insertText = exports.toggleSelectionLetterSpacing = exports.toggleSelectionFontFamily = exports.toggleSelectionLineHeight = exports.toggleSelectionFontSize = exports.toggleSelectionBackgroundColor = exports.toggleSelectionColor = exports.decreaseSelectionIndent = exports.increaseSelectionIndent = exports.toggleSelectionIndent = exports.toggleSelectionAlignment = exports.removeSelectionInlineStyles = exports.toggleSelectionInlineStyle = exports.selectionHasInlineStyle = exports.getSelectionInlineStyle = exports.toggleSelectionLink = exports.toggleSelectionEntity = exports.getSelectionEntityData = exports.getSelectionEntityType = exports.toggleSelectionBlockType = exports.getSelectionText = exports.getSelectionBlockType = exports.getSelectionBlockData = exports.setSelectionBlockData = exports.getSelectedBlocks = exports.updateEachCharacterOfSelection = exports.getSelectionBlock = exports.removeBlock = exports.selectNextBlock = exports.selectBlock = exports.selectionContainsStrictBlock = exports.selectionContainsBlockType = exports.isSelectionCollapsed = exports.createEditorState = exports.createEmptyEditorState = exports.isEditorState = exports.registerStrictBlockType = undefined;
 
 var _draftJs = require('draft-js');
 
 var _draftjsUtils = require('draftjs-utils');
 
 var _braftConvert = require('braft-convert');
+
+var _immutable = require('immutable');
+
+var _immutable2 = _interopRequireDefault(_immutable);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var strictBlockTypes = ['atomic'];
 
@@ -84,6 +90,63 @@ var removeBlock = exports.removeBlock = function removeBlock(editorState, block)
 
 var getSelectionBlock = exports.getSelectionBlock = function getSelectionBlock(editorState) {
   return editorState.getCurrentContent().getBlockForKey(editorState.getSelection().getAnchorKey());
+};
+
+var updateEachCharacterOfSelection = exports.updateEachCharacterOfSelection = function updateEachCharacterOfSelection(editorState, callback) {
+
+  var selectionState = editorState.getSelection();
+  var contentState = editorState.getCurrentContent();
+  var contentBlocks = contentState.getBlockMap();
+  var selectedBlocks = getSelectedBlocks(editorState);
+
+  if (selectedBlocks.length === 0) {
+    return editorState;
+  }
+
+  var startKey = selectionState.getStartKey();
+  var startOffset = selectionState.getStartOffset();
+  var endKey = selectionState.getEndKey();
+  var endOffset = selectionState.getEndOffset();
+
+  var nextContentBlocks = contentBlocks.map(function (block) {
+
+    if (selectedBlocks.indexOf(block) === -1) {
+      return block;
+    }
+
+    var charactersList = block.getCharacterList();
+    var nextCharactersList = null;
+
+    if (block.getKey() === startKey) {
+      nextCharactersList = charactersList.map(function (character, index) {
+        if (index >= startOffset) {
+          return callback(character);
+        }
+        return character;
+      });
+    } else if (block.getKey() === endKey) {
+      nextCharactersList = charactersList.map(function (character, index) {
+        if (index <= endOffset) {
+          return callback(character);
+        }
+        return character;
+      });
+    } else {
+      nextCharactersList = charactersList.map(function (character) {
+        return callback(character);
+      });
+    }
+
+    return block.merge({
+      'characterList': nextCharactersList
+    });
+  });
+
+  return _draftJs.EditorState.push(editorState, contentState.merge({
+    blockMap: nextContentBlocks,
+    selectionBefore: selectionState,
+    selectionAfter: selectionState
+  }), 'update-selection-character-list');
 };
 
 var getSelectedBlocks = exports.getSelectedBlocks = function getSelectedBlocks(editorState) {
@@ -270,21 +333,33 @@ var toggleSelectionInlineStyle = exports.toggleSelectionInlineStyle = function t
   var prefix = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
 
 
+  var nextEditorState = editorState;
   style = prefix + style.toUpperCase();
 
-  var stylesToBeRemoved = prefix ? editorState.getCurrentInlineStyle().toJS().filter(function (item) {
-    return item.indexOf(prefix) === 0 && item !== style;
-  }) : [];
+  if (prefix) {
 
-  var nextEditorState = stylesToBeRemoved.length ? stylesToBeRemoved.reduce(function (editorState, item) {
-    return _draftJs.RichUtils.toggleInlineStyle(editorState, item);
-  }, editorState) : editorState;
+    nextEditorState = updateEachCharacterOfSelection(nextEditorState, function (characterMetadata) {
+
+      return characterMetadata.toJS().style.reduce(function (characterMetadata, style) {
+        if (style.indexOf(prefix) === 0) {
+          return _draftJs.CharacterMetadata.removeStyle(characterMetadata, style);
+        } else {
+          return characterMetadata;
+        }
+      }, characterMetadata);
+    });
+  }
 
   return _draftJs.RichUtils.toggleInlineStyle(nextEditorState, style);
 };
 
 var removeSelectionInlineStyles = exports.removeSelectionInlineStyles = function removeSelectionInlineStyles(editorState) {
-  return (0, _draftjsUtils.removeAllInlineStyles)(editorState);
+
+  return updateEachCharacterOfSelection(editorState, function (characterMetadata) {
+    return characterMetadata.merge({
+      style: _immutable2.default.OrderedSet([])
+    });
+  });
 };
 
 var toggleSelectionAlignment = exports.toggleSelectionAlignment = function toggleSelectionAlignment(editorState, alignment) {

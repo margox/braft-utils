@@ -1,6 +1,7 @@
-import { Modifier, EditorState, SelectionState, RichUtils, AtomicBlockUtils, convertFromRaw } from 'draft-js'
-import { setBlockData, getSelectionEntity, removeAllInlineStyles } from 'draftjs-utils'
+import { Modifier, EditorState, SelectionState, RichUtils, CharacterMetadata, AtomicBlockUtils, convertFromRaw } from 'draft-js'
+import { setBlockData, getSelectionEntity } from 'draftjs-utils'
 import { convertHTMLToRaw } from 'braft-convert'
+import Immutable from 'immutable'
 
 const strictBlockTypes = ['atomic']
 
@@ -72,6 +73,65 @@ export const getSelectionBlock = (editorState) => {
   return editorState.getCurrentContent().getBlockForKey(editorState.getSelection().getAnchorKey())
 }
 
+export const updateEachCharacterOfSelection = (editorState, callback) => {
+
+  const selectionState = editorState.getSelection()
+  const contentState = editorState.getCurrentContent()
+  const contentBlocks = contentState.getBlockMap()
+  const selectedBlocks = getSelectedBlocks(editorState)
+
+  if (selectedBlocks.length === 0) {
+    return editorState
+  }
+
+  const startKey = selectionState.getStartKey()
+  const startOffset = selectionState.getStartOffset()
+  const endKey = selectionState.getEndKey()
+  const endOffset = selectionState.getEndOffset()
+
+  const nextContentBlocks = contentBlocks.map((block) => {
+
+    if (selectedBlocks.indexOf(block) === -1) {
+      return block
+    }
+
+    const charactersList = block.getCharacterList()
+    let nextCharactersList = null
+
+    if (block.getKey() === startKey) {
+      nextCharactersList = charactersList.map((character, index) => {
+        if (index >= startOffset) {
+          return callback(character)
+        }
+        return character
+      })
+    } else if (block.getKey() === endKey) {
+      nextCharactersList = charactersList.map((character, index) => {
+        if (index <= endOffset) {
+          return callback(character)
+        }
+        return character
+      })
+    } else {
+      nextCharactersList = charactersList.map((character) => {
+        return callback(character)
+      })
+    }
+
+    return block.merge({
+      'characterList': nextCharactersList
+    })
+
+  })
+
+  return EditorState.push(editorState, contentState.merge({
+    blockMap: nextContentBlocks,
+    selectionBefore: selectionState,
+    selectionAfter: selectionState
+  }), 'update-selection-character-list')
+
+}
+
 export const getSelectedBlocks = (editorState) => {
 
   const selectionState = editorState.getSelection()
@@ -134,7 +194,7 @@ export const getSelectionText = (editorState) => {
   const start = selectionState.getStartOffset()
   const end = selectionState.getEndOffset()
 
-  return currentContentBlock.getText().slice(start, end);
+  return currentContentBlock.getText().slice(start, end)
 
 }
 
@@ -266,20 +326,37 @@ export const selectionHasInlineStyle = (editorState, style) => {
 
 export const toggleSelectionInlineStyle = (editorState, style, prefix = '') => {
 
+  let nextEditorState = editorState
   style = prefix + style.toUpperCase()
 
-  const stylesToBeRemoved = prefix ? editorState.getCurrentInlineStyle().toJS().filter(item => item.indexOf(prefix) === 0 && item !== style) : []
+  if (prefix) {
 
-  let nextEditorState = stylesToBeRemoved.length ? stylesToBeRemoved.reduce((editorState, item) => {
-    return RichUtils.toggleInlineStyle(editorState, item)
-  }, editorState) : editorState
+    nextEditorState = updateEachCharacterOfSelection(nextEditorState, (characterMetadata) => {
+
+      return characterMetadata.toJS().style.reduce((characterMetadata, style) => {
+        if (style.indexOf(prefix) === 0) {
+          return CharacterMetadata.removeStyle(characterMetadata, style)
+        } else {
+          return characterMetadata
+        }
+      }, characterMetadata)
+
+    })
+
+  }
 
   return RichUtils.toggleInlineStyle(nextEditorState, style)
 
 }
 
 export const removeSelectionInlineStyles = (editorState) => {
-  return removeAllInlineStyles(editorState)
+
+  return updateEachCharacterOfSelection(editorState, (characterMetadata) => {
+    return characterMetadata.merge({
+      style: Immutable.OrderedSet([])
+    })
+  })
+
 }
 
 export const toggleSelectionAlignment = (editorState, alignment) => {
