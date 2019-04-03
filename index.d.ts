@@ -203,6 +203,6 @@ export namespace ContentUtils {
     function toggleSelectionInlineStyle(editorState: EditorState, style: string, prefix: string): EditorState;
     function toggleSelectionLetterSpacing(editorState: EditorState, letterSpacing: string): EditorState;
     function toggleSelectionLineHeight(editorState: EditorState, lineHeight: string): EditorState;
-    function toggleSelectionLink(editorState: EditorState, href: any, target: any): EditorState;
+    function toggleSelectionLink(editorState: EditorState, href: string, target: string): EditorState;
     function undo(editorState: EditorState): EditorState;
 }
