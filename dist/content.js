@@ -114,19 +114,27 @@ var updateEachCharacterOfSelection = exports.updateEachCharacterOfSelection = fu
       return block;
     }
 
+    var blockKey = block.getKey();
     var charactersList = block.getCharacterList();
     var nextCharactersList = null;
 
-    if (block.getKey() === startKey) {
+    if (blockKey === startKey && blockKey === endKey) {
+      nextCharactersList = charactersList.map(function (character, index) {
+        if (index >= startOffset && index < endOffset) {
+          return callback(character);
+        }
+        return character;
+      });
+    } else if (blockKey === startKey) {
       nextCharactersList = charactersList.map(function (character, index) {
         if (index >= startOffset) {
           return callback(character);
         }
         return character;
       });
-    } else if (block.getKey() === endKey) {
+    } else if (blockKey === endKey) {
       nextCharactersList = charactersList.map(function (character, index) {
-        if (index <= endOffset) {
+        if (index < endOffset) {
           return callback(character);
         }
         return character;
@@ -340,9 +348,9 @@ var toggleSelectionInlineStyle = exports.toggleSelectionInlineStyle = function t
 
     nextEditorState = updateEachCharacterOfSelection(nextEditorState, function (characterMetadata) {
 
-      return characterMetadata.toJS().style.reduce(function (characterMetadata, style) {
-        if (style.indexOf(prefix) === 0) {
-          return _draftJs.CharacterMetadata.removeStyle(characterMetadata, style);
+      return characterMetadata.toJS().style.reduce(function (characterMetadata, characterStyle) {
+        if (characterStyle.indexOf(prefix) === 0 && style !== characterStyle) {
+          return _draftJs.CharacterMetadata.removeStyle(characterMetadata, characterStyle);
         } else {
           return characterMetadata;
         }
