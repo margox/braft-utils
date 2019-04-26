@@ -384,9 +384,9 @@ export const increaseSelectionIndent = (editorState, maxIndent = 6) => {
   return toggleSelectionIndent(editorState, currentIndent + 1, maxIndent)
 }
 
-export const decreaseSelectionIndent = (editorState) => {
+export const decreaseSelectionIndent = (editorState, maxIndent) => {
   const currentIndent = getSelectionBlockData(editorState, 'textIndent') || 0
-  return toggleSelectionIndent(editorState, currentIndent - 1)
+  return toggleSelectionIndent(editorState, currentIndent - 1, maxIndent)
 }
 
 export const toggleSelectionColor = (editorState, color) => {

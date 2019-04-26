@@ -391,9 +391,9 @@ var increaseSelectionIndent = exports.increaseSelectionIndent = function increas
   return toggleSelectionIndent(editorState, currentIndent + 1, maxIndent);
 };
 
-var decreaseSelectionIndent = exports.decreaseSelectionIndent = function decreaseSelectionIndent(editorState) {
+var decreaseSelectionIndent = exports.decreaseSelectionIndent = function decreaseSelectionIndent(editorState, maxIndent) {
   var currentIndent = getSelectionBlockData(editorState, 'textIndent') || 0;
-  return toggleSelectionIndent(editorState, currentIndent - 1);
+  return toggleSelectionIndent(editorState, currentIndent - 1, maxIndent);
 };
 
 var toggleSelectionColor = exports.toggleSelectionColor = function toggleSelectionColor(editorState, color) {
