@@ -95,19 +95,27 @@ export const updateEachCharacterOfSelection = (editorState, callback) => {
       return block
     }
 
+    const blockKey = block.getKey()
     const charactersList = block.getCharacterList()
     let nextCharactersList = null
 
-    if (block.getKey() === startKey) {
+    if (blockKey === startKey && blockKey === endKey) {
+      nextCharactersList = charactersList.map((character, index) => {
+        if (index >= startOffset && index < endOffset) {
+          return callback(character)
+        }
+        return character
+      })
+    } else if (blockKey === startKey) {
       nextCharactersList = charactersList.map((character, index) => {
         if (index >= startOffset) {
           return callback(character)
         }
         return character
       })
-    } else if (block.getKey() === endKey) {
+    } else if (blockKey === endKey) {
       nextCharactersList = charactersList.map((character, index) => {
-        if (index <= endOffset) {
+        if (index < endOffset) {
           return callback(character)
         }
         return character
@@ -333,9 +341,9 @@ export const toggleSelectionInlineStyle = (editorState, style, prefix = '') => {
 
     nextEditorState = updateEachCharacterOfSelection(nextEditorState, (characterMetadata) => {
 
-      return characterMetadata.toJS().style.reduce((characterMetadata, style) => {
-        if (style.indexOf(prefix) === 0) {
-          return CharacterMetadata.removeStyle(characterMetadata, style)
+      return characterMetadata.toJS().style.reduce((characterMetadata, characterStyle) => {
+        if (characterStyle.indexOf(prefix) === 0 && style !== characterStyle) {
+          return CharacterMetadata.removeStyle(characterMetadata, characterStyle)
         } else {
           return characterMetadata
         }
@@ -376,9 +384,9 @@ export const increaseSelectionIndent = (editorState, maxIndent = 6) => {
   return toggleSelectionIndent(editorState, currentIndent + 1, maxIndent)
 }
 
-export const decreaseSelectionIndent = (editorState) => {
+export const decreaseSelectionIndent = (editorState, maxIndent) => {
   const currentIndent = getSelectionBlockData(editorState, 'textIndent') || 0
-  return toggleSelectionIndent(editorState, currentIndent - 1)
+  return toggleSelectionIndent(editorState, currentIndent - 1, maxIndent)
 }
 
 export const toggleSelectionColor = (editorState, color) => {
