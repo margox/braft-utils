@@ -277,12 +277,12 @@ export const toggleSelectionEntity = (editorState, entity) => {
 
 }
 
-export const toggleSelectionLink = (editorState, href, target) => {
+export const toggleSelectionLink = (editorState, href, attributes) => {
 
   const contentState = editorState.getCurrentContent()
   const selectionState = editorState.getSelection()
 
-  let entityData = { href, target }
+  let entityData = { href, ...attributes }
 
   if (selectionState.isCollapsed() || getSelectionBlockType(editorState) === 'atomic') {
     return editorState
@@ -307,7 +307,7 @@ export const toggleSelectionLink = (editorState, href, target) => {
 
     nextEditorState = RichUtils.toggleLink(nextEditorState, selectionState, entityKey)
     nextEditorState = EditorState.forceSelection(nextEditorState, selectionState.merge({
-      anchorOffset: selectionState.getEndOffset(), 
+      anchorOffset: selectionState.getEndOffset(),
       focusOffset: selectionState.getEndOffset()
     }))
 
