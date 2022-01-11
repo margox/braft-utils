@@ -7,6 +7,10 @@
     "build": "rm -rf dist/ && BABEL_ENV=production ./node_modules/.bin/babel src --copy-files --extensions .es6,.es,.js,.jsx --out-dir dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/margox/braft-utils.git"
+  },
   "keywords": [
     "braft",
     "editor",
